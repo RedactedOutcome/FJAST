@@ -33,13 +33,51 @@ namespace FJASTP{
                     m_CurrentLineStart=++m_At;
                     continue;
                 }
+                case '/':{
+                    //Check if comment
+                    char nextChar = m_CurrentInput.Get(m_At + 1);
+                    if(nextChar == '/'){
+                        m_At+=2;
+
+                        while(true){
+                            if(m_At >= m_InputSize){
+                                //Last line
+                                return TokenizeResult();
+                            }
+                            char c = m_CurrentInput.At(m_At++);
+                            if(c == '\n'){
+                                m_Line++;
+                                m_CurrentLineStart = m_At;
+                                break;
+                            }
+                            if(c == '\12'){
+                                nextChar = m_CurrentInput.Get(m_At++);
+                                if(nextChar == '\n'){
+                                    m_At++;
+                                    m_Line++;
+                                    m_CurrentLineStart = m_At;
+                                    break;
+                                }
+
+                                m_Line++;
+                                m_CurrentLineStart = m_At;
+                            }
+                        }
+                        break;
+                    }
+
+                    //Operators that start with /
+                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
+                    m_At++;
+                    break;
+                }
                 case '{':
                 case '}':
                 case '[':
                 case ']':
                 case '(':
                 case ')':{
-                    m_CurrentOutput->emplace_back(Token(TokenType::GroupingSymbol, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn()));
+                    m_CurrentOutput->emplace_back(TokenType::GroupingSymbol, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn());
                     m_At++;
                     break;
                 }
@@ -48,7 +86,7 @@ namespace FJASTP{
                 case ';':
                 case '`':
                 case '?':{
-                    m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn()));
+                    m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn());
                     m_At++;
                     break;
                 }
@@ -111,16 +149,16 @@ namespace FJASTP{
 
                         if(m_At < m_InputSize){
                             char c = m_CurrentInput.At(m_At);
-                            if(c != ' ' && IsValidLiteralSplitter(c)){
+                            if(!IsValidLiteralSplitter(c)){
                                 return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                             }
                         }
                         
                         uint8_t metadata = (isNegative ? 128 : 0) | (usesNotation ? 64 : 0);
-                        m_CurrentOutput->emplace_back(Token(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn()));
+                        m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
                         break;
                     }
-                    m_CurrentOutput->emplace_back(Token(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn()));
+                    m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn());
                     break;
                 }
                 case '0':
@@ -203,18 +241,18 @@ namespace FJASTP{
                         char afterNext = m_CurrentInput.Get(++m_At);
                         if(afterNext == '='){
                             m_At++;
-                            m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn()));
+                            m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn());
                             continue;
                         }
-                        m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("==", 2, false, false), m_Line, GetCurrentColumn()));
+                        m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, HBuffer("==", 2, false, false), m_Line, GetCurrentColumn());
                     }
                     else if (nextChar == '>'){
                         m_At++;
-                        m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn()));
+                        m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn());
                         continue;
                     }
                     else{
-                        m_CurrentOutput->emplace_back(Token(TokenType::AssignmentOperator, HBuffer("=", 1, false, false), m_Line, GetCurrentColumn()));
+                        m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, HBuffer("=", 1, false, false), m_Line, GetCurrentColumn());
                     }
                     break;
                 }
@@ -294,7 +332,7 @@ namespace FJASTP{
         size_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
         TokenType tokenType = FJASTP::IsKeyword(buff) ? TokenType::Keyword : TokenType::Identifier;
-        m_CurrentOutput->emplace_back(Token(tokenType, std::move(buff), m_Line, GetCurrentColumn(startAt)));
+        m_CurrentOutput->emplace_back(tokenType, std::move(buff), m_Line, GetCurrentColumn(startAt));
         //Success no need to return anything
         return TokenizeResult();
     }
@@ -310,11 +348,12 @@ namespace FJASTP{
         case '}':
         case '$':
         case '%':
-        case '+',
-        case '-',
-        case '=',
-        case '!',
+        case '+':
+        case '-':
+        case '=':
+        case '!':
         case '`':
+        case '/':
         case '@':
             return true;
         default:

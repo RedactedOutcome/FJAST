@@ -1,7 +1,7 @@
 class Test1{
     constructor(){
         this.TestFunction1();
-
-        var i = .1x123121;
+        //This is a comment btw,
+        var i = .1/x123121;
     }
 }
