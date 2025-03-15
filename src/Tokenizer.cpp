@@ -20,10 +20,12 @@ namespace FJASTP{
                 }
                 case '\15':{
                     char next = m_CurrentInput.Get(++m_At);
+                    m_Line++;
                     if(next == '\n'){
-                        m_Line++;
                         m_CurrentLineStart=++m_At;
+                        continue;
                     }
+                    m_CurrentLineStart=m_At;
                     continue;
                 }
                 case '\n':{
@@ -100,12 +102,20 @@ namespace FJASTP{
                                     }
                                     break;
                                 }
-
-                                if(m_At - exponentStart <= 1)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                //Maybe have it be <=. Changed this code a daya fter writing and not sure
+                                if(m_At - exponentStart < 1)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                 continue;
                             }
                             break;
                         }
+
+                        if(m_At < m_InputSize){
+                            char c = m_CurrentInput.At(m_At);
+                            if(c != ' ' && IsValidLiteralSplitter(c)){
+                                return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            }
+                        }
+                        
                         uint8_t metadata = (isNegative ? 128 : 0) | (usesNotation ? 64 : 0);
                         m_CurrentOutput->emplace_back(Token(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn()));
                         break;
@@ -287,5 +297,28 @@ namespace FJASTP{
         m_CurrentOutput->emplace_back(Token(tokenType, std::move(buff), m_Line, GetCurrentColumn(startAt)));
         //Success no need to return anything
         return TokenizeResult();
+    }
+    bool Tokenizer::IsValidLiteralSplitter(char c) const noexcept{
+        switch(c){
+        case '\12':
+        case '\15':
+        case '*':
+        case ' ':
+        case '(':
+        case ')':
+        case '{':
+        case '}':
+        case '$':
+        case '%':
+        case '+',
+        case '-',
+        case '=',
+        case '!',
+        case '`':
+        case '@':
+            return true;
+        default:
+            return false;
+        }
     }
 }

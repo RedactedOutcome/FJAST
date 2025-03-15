@@ -34,6 +34,9 @@ namespace FJASTP{
         /// @return returns success if is valid utf8 javascript identifier character.
         TokenizeResult ValidateUTF8() noexcept;
 
+        /// @brief Checks if characer is valid LiteralSplitter. For example if we have 0x00hello. if the next character followed by the literal isnt a grouping symbol, special character, whitespace, newline, etc they we have a parse error
+        bool IsValidLiteralSplitter(char c) const noexcept;
+
         /// @brief starts parsing the rest of an identifier
         /// @param startChar must either be a valid alphabetical character, number, underscore, else must be some sort of utf8 character
         TokenizeResult ParseIdentifier(char startChar)noexcept;
