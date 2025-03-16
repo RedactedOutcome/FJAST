@@ -124,11 +124,11 @@ namespace FJASTP{
                 }
                 case '.':{
                     /// TODO: if we break the character loop we need to verify if a valid seperator/token is following it. Identifiers cant immediately follow without a white space or valid token
-                    char nextChar = m_CurrentInput.Get(++m_At);
+                    char nextChar = m_CurrentInput.Get(m_At + 1);
                     if(nextChar >= '0' && nextChar <= '9'){
                         //Floating Point Numerical Literal
-                        uint32_t startAt = m_At-1;
-                        m_At++;
+                        uint32_t startAt = m_At;
+                        m_At+=2;
 
                         //Scientific Notation
                         bool usesNotation = false;
@@ -188,7 +188,7 @@ namespace FJASTP{
                         m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
                         break;
                     }
-                    m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn());
+                    m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At++, 1), m_Line, GetCurrentColumn());
                     break;
                 }
                 case '-':{

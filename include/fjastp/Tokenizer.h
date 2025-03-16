@@ -28,6 +28,7 @@ namespace FJASTP{
     class Tokenizer{
     public:
         /// @brief Parses the input file as javascript and appends tokens to output. Doesnt allocate new data just points to offset of the input buffer
+        /// @param input the hbuffer that contains the buffer that the ouput datas buffers point to
         /// @return returns a empty TokenizeResult state with a success value if tokizing was successfull, else returns the line, column, and status code
         [[nodiscard]] TokenizeResult Tokenize(const HBuffer& input, std::vector<Token>& output) noexcept;
     private:
@@ -41,7 +42,7 @@ namespace FJASTP{
         /// @brief starts parsing the rest of an identifier
         /// @param startChar must either be a valid alphabetical character, number, underscore, else must be some sort of utf8 character
         TokenizeResult ParseIdentifier(char startChar)noexcept;
-        
+
         uint32_t GetCurrentColumn() const noexcept{return (m_At - m_CurrentLineStart - m_UnicodeBytesInLine) + 1;}
         /// @brief returns the column number of a position inside the buffer. at must be atleast the start of the current line
         uint32_t GetCurrentColumn(uint32_t at) const noexcept{return (at - m_CurrentLineStart - m_UnicodeBytesInLine) + 1;}
