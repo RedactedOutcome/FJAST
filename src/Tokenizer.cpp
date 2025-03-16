@@ -65,7 +65,23 @@ namespace FJASTP{
                         }
                         break;
                     }
-
+                    else if(nextChar == '*'){
+                        m_At+=2;
+                        while(true){
+                            if(m_At >= m_InputSize){
+                                return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+                            }
+                            char c = m_CurrentInput.At(m_At);
+                            if(c == '*'){
+                                if(m_CurrentInput.Get(m_At + 1) == '/'){
+                                    m_At+=2;
+                                    break;
+                                }
+                            }
+                            m_At++;
+                        }
+                        break;
+                    }
                     //Operators that start with /
                     m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
                     m_At++;
