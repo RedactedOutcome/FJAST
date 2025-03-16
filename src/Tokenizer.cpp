@@ -103,6 +103,46 @@ namespace FJASTP{
                     m_At++;
                     break;
                 }
+                case '*':{
+                    char c = m_CurrentInput.Get(m_At + 1);
+
+                    if(c == '*'){
+                        //Exponentiation Operator
+                        m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
+                        m_At+=2;
+                        continue;
+                    }
+                    else if(c == '='){
+                        //Exponentiation Operator
+                        m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
+                        m_At+=2;
+                        continue;
+                    }
+
+                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
+                    m_At++;
+                    break;
+                }
+                case '+':{
+                    char c = m_CurrentInput.Get(m_At + 1);
+
+                    if(c == '+'){
+                        //Unary Operator
+                        m_CurrentOutput->emplace_back(TokenType::UnaryOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
+                        m_At+=2;
+                        continue;
+                    }
+                    else if(c == '='){
+                        //Unary Operator
+                        m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
+                        m_At+=2;
+                        continue;
+                    }
+
+                    m_CurrentOuput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
+                    m_At++;
+                    break;
+                }
                 case '{':
                 case '}':
                 case '[':
@@ -125,6 +165,9 @@ namespace FJASTP{
                 case '.':{
                     /// TODO: if we break the character loop we need to verify if a valid seperator/token is following it. Identifiers cant immediately follow without a white space or valid token
                     char nextChar = m_CurrentInput.Get(m_At + 1);
+
+                    /*
+                    Bro we gotta start reading documentation before adding this kinda support for literals that arent allowed
                     if(nextChar >= '0' && nextChar <= '9'){
                         //Floating Point Numerical Literal
                         uint32_t startAt = m_At;
@@ -188,6 +231,7 @@ namespace FJASTP{
                         m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
                         break;
                     }
+                    */
                     m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At++, 1), m_Line, GetCurrentColumn());
                     break;
                 }
