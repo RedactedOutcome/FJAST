@@ -12,13 +12,13 @@
 
 namespace FJASTP{
     struct TokenizeResult{
-        size_t m_Line;
-        size_t m_Column;
+        uint32_t m_Line;
+        uint32_t m_Column;
         TokenizerError m_ErrorCode;    //Type of TokenizerError
 
         TokenizeResult() noexcept: m_Line(0), m_Column(0), m_ErrorCode(TokenizerError::Success){}
-        TokenizeResult(size_t line, size_t column) noexcept: m_Line(line), m_Column(column), m_ErrorCode(TokenizerError::Success){}
-        TokenizeResult(size_t line, size_t column, TokenizerError errorCode) noexcept: m_Line(line), m_Column(column), m_ErrorCode(errorCode){}
+        TokenizeResult(uint32_t line, uint32_t column) noexcept: m_Line(line), m_Column(column), m_ErrorCode(TokenizerError::Success){}
+        TokenizeResult(uint32_t line, uint32_t column, TokenizerError errorCode) noexcept: m_Line(line), m_Column(column), m_ErrorCode(errorCode){}
 
         constexpr operator bool() const noexcept{
             return m_ErrorCode == TokenizerError::Success;
@@ -41,17 +41,17 @@ namespace FJASTP{
         /// @brief starts parsing the rest of an identifier
         /// @param startChar must either be a valid alphabetical character, number, underscore, else must be some sort of utf8 character
         TokenizeResult ParseIdentifier(char startChar)noexcept;
-
-        size_t GetCurrentColumn() const noexcept{return (m_At - m_CurrentLineStart - m_UnicodeBytesInLine) + 1;}
+        
+        uint32_t GetCurrentColumn() const noexcept{return (m_At - m_CurrentLineStart - m_UnicodeBytesInLine) + 1;}
         /// @brief returns the column number of a position inside the buffer. at must be atleast the start of the current line
-        size_t GetCurrentColumn(size_t at) const noexcept{return (at - m_CurrentLineStart - m_UnicodeBytesInLine) + 1;}
+        uint32_t GetCurrentColumn(uint32_t at) const noexcept{return (at - m_CurrentLineStart - m_UnicodeBytesInLine) + 1;}
     private:
-        size_t m_At = 0;
-        size_t m_Line = 1;     //What line the tokenizer is currently on
-        size_t m_CurrentLineStart=0;    //Determines where the current line started in the buffer to calculate the column
-        size_t m_UnicodeBytesInLine=0;    //Determines where the current line started in the buffer to calculate the column
+        uint32_t m_At = 0;
+        uint32_t m_Line = 1;     //What line the tokenizer is currently on
+        uint32_t m_CurrentLineStart=0;    //Determines where the current line started in the buffer to calculate the column
+        uint32_t m_UnicodeBytesInLine=0;    //Determines where the current line started in the buffer to calculate the column
         HBuffer m_CurrentInput;
-        size_t m_InputSize;
+        uint32_t m_InputSize;
         std::vector<Token>* m_CurrentOutput = nullptr;
     };
 }

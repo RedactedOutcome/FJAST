@@ -46,7 +46,7 @@ int main(int argc, char** argv){
     }
 
     std::cout << "Done Tokenizing"<<std::endl;
-
+    
     for(size_t i = 0; i < tokens.size(); i++){
         FJASTP::Token& token = tokens[i];
         std::cout << "Token " << i << " " << token.GetLineNumber() << ":" << token.GetColumnNumber()<< " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;

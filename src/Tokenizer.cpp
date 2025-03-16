@@ -82,6 +82,7 @@ namespace FJASTP{
                         }
                         break;
                     }
+
                     //Operators that start with /
                     m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
                     m_At++;
@@ -106,20 +107,18 @@ namespace FJASTP{
                     m_At++;
                     break;
                 }
-                //TODO: handle numerical literals that start with a .
                 case '.':{
                     /// TODO: if we break the character loop we need to verify if a valid seperator/token is following it. Identifiers cant immediately follow without a white space or valid token
                     char nextChar = m_CurrentInput.Get(++m_At);
                     if(nextChar >= '0' && nextChar <= '9'){
                         //Floating Point Numerical Literal
-                        size_t startAt = m_At-1;
+                        uint32_t startAt = m_At-1;
                         m_At++;
 
                         //Scientific Notation
                         bool usesNotation = false;
                         bool isNegative = false;
                         uint8_t notationAt=0;
-                        std::cout<<"Starting"<<std::endl;
                         while(true){
                             if(m_At >= m_InputSize)break;
                             char current = m_CurrentInput.At(m_At);
@@ -145,7 +144,7 @@ namespace FJASTP{
                                     current = m_CurrentInput.At(m_At);
                                 }
 
-                                size_t exponentStart = m_At;
+                                uint32_t exponentStart = m_At;
 
                                 //Check for digits
                                 while(true){
@@ -177,6 +176,23 @@ namespace FJASTP{
                     m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn());
                     break;
                 }
+                case '-':{
+                    //Handle negation and urinary operators
+                    m_At++;
+                    char c = m_CurrentInput.Get(m_At);
+                    if(c == '-'){
+                        m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, HBuffer("--", 2, false ,false), m_Line, GetCurrentColumn());
+                        m_At++;
+                        break;
+                    }
+                    if(c >= '0' && c <= '9'){
+                        //Parse NumericalLiteral
+                        
+                        break;
+                    }
+                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, "-", m_Line, GetCurrentColumn());
+                    break;
+                }
                 case '0':
                 case '1':
                 case '2':
@@ -188,9 +204,8 @@ namespace FJASTP{
                 case '8':
                 case '9':{
                     //Numerical Literal
-                    size_t m_StartAt = m_At++;
-                    bool isFloatingPoint = false;
-                    
+                    uint32_t m_StartAt = m_At++;
+
                     break;
                 }
                 case 'A':
@@ -302,7 +317,7 @@ namespace FJASTP{
         if(m_At + bytes >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
 
         uint32_t character = startChar & ((2 ^ (8 - bytes))- 1);
-        size_t startAt = m_At;
+        uint32_t startAt = m_At;
 
         for(uint8_t i = 1; i < bytes; i++){
             character<<=6;
@@ -320,7 +335,7 @@ namespace FJASTP{
     }
 
     TokenizeResult Tokenizer::ParseIdentifier(char startChar) noexcept{
-        size_t startAt = m_At;
+        uint32_t startAt = m_At;
 
         if(startChar & 128){
             TokenizeResult result = ValidateUTF8();
@@ -345,13 +360,14 @@ namespace FJASTP{
             break;
         }
 
-        size_t identifierSize = (m_At - startAt);
+        uint32_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
         TokenType tokenType = FJASTP::IsKeyword(buff) ? TokenType::Keyword : TokenType::Identifier;
         m_CurrentOutput->emplace_back(tokenType, std::move(buff), m_Line, GetCurrentColumn(startAt));
         //Success no need to return anything
         return TokenizeResult();
     }
+
     bool Tokenizer::IsValidLiteralSplitter(char c) const noexcept{
         switch(c){
         case '\12':
