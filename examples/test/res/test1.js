@@ -4,6 +4,6 @@ class Test1{
         //sdfasdf
         //This is a comment
         var i = /*Caps*/.1/x123121;
-        let x = -0b41;
+        let x = -0xbA-;
     }
 }

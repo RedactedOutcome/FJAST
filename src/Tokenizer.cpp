@@ -222,13 +222,15 @@ namespace FJASTP{
                                     shouldContinue = true;
                                     break;
                                 }
+                                break;
                             }
                             case NumericalLiteralBaseMetadataFormat::Hexidecimal:{
-                                if((c >= '0' && c <= '9') || (c >= 'A' || c <= 'F') || (c >= 'a' && c <= 'f')){
+                                if((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')){
                                     m_At++;
                                     shouldContinue = true;
                                     break;
                                 }
+                                break;
                             }
                             case NumericalLiteralBaseMetadataFormat::Binary:{
                                 if((c >= '0' && c <= '1')){
@@ -236,6 +238,7 @@ namespace FJASTP{
                                     shouldContinue = true;
                                     break;
                                 }
+                                break;
                             }
                             }
                             if(shouldContinue)continue;
@@ -274,11 +277,14 @@ namespace FJASTP{
                             }
 
                             if(c == '-'){
-                                if(format != NumericalLiteralBaseMetadataFormat::ScientificNotation || notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                notationExponentNeg=true;
-                                m_At++;
-                                continue;
+                                if(format == NumericalLiteralBaseMetadataFormat::ScientificNotation){
+                                    if(notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                    notationExponentNeg = true;
+                                    m_At++;
+                                    continue;
+                                }
                             }
+                            if(!IsValidLiteralSplitter(c))return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                             break;
                         }
 
@@ -483,6 +489,7 @@ namespace FJASTP{
         case '`':
         case '/':
         case '@':
+        case ';':
             return true;
         default:
             return false;
