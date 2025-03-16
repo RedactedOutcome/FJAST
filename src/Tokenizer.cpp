@@ -200,98 +200,6 @@ namespace FJASTP{
                         m_At++;
                         break;
                     }
-                    if(c >= '0' && c <= '9'){
-                        //Parse NumericalLiteral
-                        uint32_t startAt = m_At - 1;
-                        m_At++;
-
-                        bool hasDecimal = false;
-                        NumericalLiteralBaseMetadataFormat format = NumericalLiteralBaseMetadataFormat::Base10;
-                        bool notationExponentNeg = false;
-                        bool startedExponent=false;
-
-                        while(true){
-                            if(m_At >= m_InputSize)break;
-                            char c = m_CurrentInput.At(m_At);
-                            
-                            bool shouldContinue = false;
-                            switch(format){
-                            case NumericalLiteralBaseMetadataFormat::ScientificNotation:
-                            case NumericalLiteralBaseMetadataFormat::Base10:{
-                                if(c >= '0' && c <= '9'){
-                                    m_At++;
-                                    shouldContinue = true;
-                                    startedExponent = true;
-                                    break;
-                                }
-                                break;
-                            }
-                            case NumericalLiteralBaseMetadataFormat::Hexidecimal:{
-                                if((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')){
-                                    m_At++;
-                                    shouldContinue = true;
-                                    break;
-                                }
-                                break;
-                            }
-                            case NumericalLiteralBaseMetadataFormat::Binary:{
-                                if((c >= '0' && c <= '1')){
-                                    m_At++;
-                                    shouldContinue = true;
-                                    break;
-                                }
-                                break;
-                            }
-                            }
-                            if(shouldContinue)continue;
-
-                            if(c == '.'){
-                                if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                hasDecimal = true;
-                                m_At++;
-                                continue;
-                            }
-                            if(c == 'x' || c == 'X'){
-                                if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                format = NumericalLiteralBaseMetadataFormat::Hexidecimal;
-                                m_At++;
-                                continue;
-                            }
-                            if(c == 'b' || c == 'B'){
-                                if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                format = NumericalLiteralBaseMetadataFormat::Binary;
-                                m_At++;
-                                continue;
-                            }
-
-                            if(c == 'E' || c == 'e'){
-                                if(format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                format = NumericalLiteralBaseMetadataFormat::ScientificNotation;
-                                m_At++;
-                                startedExponent = false;
-                                continue;
-                            }
-
-                            if(c == '-'){
-                                if(!startedExponent && format == NumericalLiteralBaseMetadataFormat::ScientificNotation){
-                                    if(notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                    notationExponentNeg = true;
-                                    m_At++;
-                                    continue;
-                                }
-                            }
-                            if(!IsValidLiteralSplitter(c))return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                            break;
-                        }
-
-                        uint8_t metadata = 128 | (hasDecimal ? 64 : 0) | ((uint8_t)format << 3) || (notationExponentNeg ? 4 : 0);
-                        m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
-                        break;
-                    }
                     m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, "-", m_Line, GetCurrentColumn());
                     break;
                 }
@@ -306,8 +214,94 @@ namespace FJASTP{
                 case '8':
                 case '9':{
                     //Numerical Literal
-                    uint32_t m_StartAt = m_At++;
+                    uint32_t startAt = m_At;
+                    m_At++;
 
+                    bool hasDecimal = false;
+                    NumericalLiteralBaseMetadataFormat format = NumericalLiteralBaseMetadataFormat::Base10;
+                    bool notationExponentNeg = false;
+                    bool startedExponent=false;
+
+                    while(true){
+                        if(m_At >= m_InputSize)break;
+                        char c = m_CurrentInput.At(m_At);
+                        
+                        bool shouldContinue = false;
+                        switch(format){
+                        case NumericalLiteralBaseMetadataFormat::ScientificNotation:
+                        case NumericalLiteralBaseMetadataFormat::Base10:{
+                            if(c >= '0' && c <= '9'){
+                                m_At++;
+                                shouldContinue = true;
+                                startedExponent = true;
+                                break;
+                            }
+                            break;
+                        }
+                        case NumericalLiteralBaseMetadataFormat::Hexidecimal:{
+                            if((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')){
+                                m_At++;
+                                shouldContinue = true;
+                                break;
+                            }
+                            break;
+                        }
+                        case NumericalLiteralBaseMetadataFormat::Binary:{
+                            if((c >= '0' && c <= '1')){
+                                m_At++;
+                                shouldContinue = true;
+                                break;
+                            }
+                            break;
+                        }
+                        }
+                        if(shouldContinue)continue;
+
+                        if(c == '.'){
+                            if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            hasDecimal = true;
+                            m_At++;
+                            continue;
+                        }
+                        if(c == 'x' || c == 'X'){
+                            if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            format = NumericalLiteralBaseMetadataFormat::Hexidecimal;
+                            m_At++;
+                            continue;
+                        }
+                        if(c == 'b' || c == 'B'){
+                            if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            format = NumericalLiteralBaseMetadataFormat::Binary;
+                            m_At++;
+                            continue;
+                        }
+
+                        if(c == 'E' || c == 'e'){
+                            if(format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            format = NumericalLiteralBaseMetadataFormat::ScientificNotation;
+                            m_At++;
+                            startedExponent = false;
+                            continue;
+                        }
+
+                        if(c == '-'){
+                            if(!startedExponent && format == NumericalLiteralBaseMetadataFormat::ScientificNotation){
+                                if(notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                notationExponentNeg = true;
+                                m_At++;
+                                continue;
+                            }
+                        }
+                        if(!IsValidLiteralSplitter(c))return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                        break;
+                    }
+
+                    uint8_t metadata = 128 | (hasDecimal ? 64 : 0) | ((uint8_t)format << 3) || (notationExponentNeg ? 4 : 0);
+                    m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
                     break;
                 }
                 case 'A':
