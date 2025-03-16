@@ -9,7 +9,7 @@ class Test1{
         var y = i ** 5 + x;
 
         function(){
-            console.log("Hello");
+            console.log(y);
         }
     }
 }

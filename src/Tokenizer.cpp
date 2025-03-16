@@ -110,15 +110,16 @@ namespace FJASTP{
                         //Exponentiation Operator
                         m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
                         m_At+=2;
-                        continue;
+                        break;
                     }
                     else if(c == '='){
-                        //Exponentiation Operator
+                        //Multiplication Assignment
                         m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
                         m_At+=2;
-                        continue;
+                        break;
                     }
 
+                    //Arithmetic Operator
                     m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
                     m_At++;
                     break;
@@ -138,8 +139,8 @@ namespace FJASTP{
                         m_At+=2;
                         continue;
                     }
-
-                    m_CurrentOuput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
+                    //Arithmetic Operator
+                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
                     m_At++;
                     break;
                 }
@@ -237,14 +238,13 @@ namespace FJASTP{
                 }
                 case '-':{
                     //Handle negation and urinary operators
-                    m_At++;
-                    char c = m_CurrentInput.Get(m_At);
+                    char c = m_CurrentInput.Get(m_At + 1);
                     if(c == '-'){
-                        m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, HBuffer("--", 2, false ,false), m_Line, GetCurrentColumn());
-                        m_At++;
+                        m_CurrentOutput->emplace_back(TokenType::UnaryOperator, HBuffer("--", 2, false ,false), m_Line, GetCurrentColumn());
+                        m_At+=2;
                         break;
                     }
-                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, "-", m_Line, GetCurrentColumn());
+                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At++, 1), m_Line, GetCurrentColumn());
                     break;
                 }
                 case '0':
@@ -258,6 +258,7 @@ namespace FJASTP{
                 case '8':
                 case '9':{
                     //Numerical Literal
+                    uint32_t column = GetCurrentColumn();
                     uint32_t startAt = m_At;
                     m_At++;
 
@@ -345,7 +346,7 @@ namespace FJASTP{
                     }
 
                     uint8_t metadata = 128 | (hasDecimal ? 64 : 0) | ((uint8_t)format << 3) || (notationExponentNeg ? 4 : 0);
-                    m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
+                    m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, column);
                     break;
                 }
                 case 'A':

@@ -19,6 +19,7 @@ namespace FJASTP{
         BoolLiteral,
         NullLiteral,
         ArithmeticOperator,
+        UnaryOperator,
         LogicalOperator,
         ConditionalOperator,
         AssignmentOperator,
