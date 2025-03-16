@@ -208,6 +208,7 @@ namespace FJASTP{
                         bool hasDecimal = false;
                         NumericalLiteralBaseMetadataFormat format = NumericalLiteralBaseMetadataFormat::Base10;
                         bool notationExponentNeg = false;
+                        bool startedExponent=false;
 
                         while(true){
                             if(m_At >= m_InputSize)break;
@@ -220,6 +221,7 @@ namespace FJASTP{
                                 if(c >= '0' && c <= '9'){
                                     m_At++;
                                     shouldContinue = true;
+                                    startedExponent = true;
                                     break;
                                 }
                                 break;
@@ -273,11 +275,12 @@ namespace FJASTP{
                                 if(format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                 format = NumericalLiteralBaseMetadataFormat::ScientificNotation;
                                 m_At++;
+                                startedExponent = false;
                                 continue;
                             }
 
                             if(c == '-'){
-                                if(format == NumericalLiteralBaseMetadataFormat::ScientificNotation){
+                                if(!startedExponent && format == NumericalLiteralBaseMetadataFormat::ScientificNotation){
                                     if(notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                     notationExponentNeg = true;
                                     m_At++;
