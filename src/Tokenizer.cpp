@@ -261,11 +261,8 @@ namespace FJASTP{
                             }
                             if(c == 'b' || c == 'B'){
                                 if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                std::cout << "Test1"<<std::endl;
                                 if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                std::cout << "Test2"<<std::endl;
                                 if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                std::cout << "Test3"<<std::endl;
                                 format = NumericalLiteralBaseMetadataFormat::Binary;
                                 m_At++;
                                 continue;
