@@ -206,51 +206,75 @@ namespace FJASTP{
                         m_At++;
 
                         bool hasDecimal = false;
-                        bool scientificNotation = false;
-                        bool hexidecimal = false;
-                        bool binary = false;
+                        NumericalLiteralBaseMetadataFormat format = NumericalLiteralBaseMetadataFormat::Base10;
                         bool notationExponentNeg = false;
 
                         while(true){
                             if(m_At >= m_InputSize)break;
                             char c = m_CurrentInput.At(m_At);
-                            if(c >= '0' && c <= '9'){
-                                m_At++;
-                                continue;
+                            
+                            bool shouldContinue = false;
+                            switch(format){
+                            case NumericalLiteralBaseMetadataFormat::ScientificNotation:
+                            case NumericalLiteralBaseMetadataFormat::Base10:{
+                                if(c >= '0' && c <= '9'){
+                                    m_At++;
+                                    shouldContinue = true;
+                                    break;
+                                }
                             }
+                            case NumericalLiteralBaseMetadataFormat::Hexidecimal:{
+                                if((c >= '0' && c <= '9') || (c >= 'A' || c <= 'F') || (c >= 'a' && c <= 'f')){
+                                    m_At++;
+                                    shouldContinue = true;
+                                    break;
+                                }
+                            }
+                            case NumericalLiteralBaseMetadataFormat::Binary:{
+                                if((c >= '0' && c <= '1')){
+                                    m_At++;
+                                    shouldContinue = true;
+                                    break;
+                                }
+                            }
+                            }
+                            if(shouldContinue)continue;
 
                             if(c == '.'){
-                                if(hasDecimal || hexidecimal || binary || scientificNotation)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                 hasDecimal = true;
                                 m_At++;
                                 continue;
                             }
                             if(c == 'x' || c == 'X'){
-                                if(hasDecimal || hexidecimal || binary || scientificNotation)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                 if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                 if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                hexidecimal = true;
+                                format = NumericalLiteralBaseMetadataFormat::Hexidecimal;
                                 m_At++;
                                 continue;
                             }
                             if(c == 'b' || c == 'B'){
-                                if(hasDecimal || hexidecimal || binary || scientificNotation)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                std::cout << "Test1"<<std::endl;
                                 if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                std::cout << "Test2"<<std::endl;
                                 if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                hexidecimal = true;
+                                std::cout << "Test3"<<std::endl;
+                                format = NumericalLiteralBaseMetadataFormat::Binary;
                                 m_At++;
                                 continue;
                             }
 
                             if(c == 'E' || c == 'e'){
-                                if(hexidecimal || binary || scientificNotation)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                scientificNotation = true;
+                                if(format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                format = NumericalLiteralBaseMetadataFormat::ScientificNotation;
                                 m_At++;
                                 continue;
                             }
 
                             if(c == '-'){
-                                if(hexidecimal || binary || !scientificNotation || notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                                if(format != NumericalLiteralBaseMetadataFormat::ScientificNotation || notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                 notationExponentNeg=true;
                                 m_At++;
                                 continue;
@@ -258,12 +282,7 @@ namespace FJASTP{
                             break;
                         }
 
-                        uint8_t format = 0;
-                        if(binary)format = 1;
-                        else if(hexidecimal)format = 2;
-                        else if(scientificNotation) format = 3;
-
-                        uint8_t metadata = 128 | (hasDecimal ? 64 : 0) | (format << 3) || (notationExponentNeg ? 4 : 0);
+                        uint8_t metadata = 128 | (hasDecimal ? 64 : 0) | ((uint8_t)format << 3) || (notationExponentNeg ? 4 : 0);
                         m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
                         break;
                     }

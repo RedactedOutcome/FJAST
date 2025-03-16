@@ -33,12 +33,20 @@ namespace FJASTP{
         Success=0,
         EndOfFile,
         UnsupportedToken,
+        InternalLexingError,
         InvalidUTF8Character,
         InvalidNumericalLiteral
     };
 
     enum class ParserError{
         Success=0
+    };
+
+    enum class NumericalLiteralBaseMetadataFormat : uint8_t{
+        Base10=0,
+        Binary=1,
+        Hexidecimal=2,
+        ScientificNotation=3
     };
 
     class FJASTP{
