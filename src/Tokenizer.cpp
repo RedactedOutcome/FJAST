@@ -131,13 +131,13 @@ namespace FJASTP{
                         //Unary Operator
                         m_CurrentOutput->emplace_back(TokenType::UnaryOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
                         m_At+=2;
-                        continue;
+                        break;
                     }
                     else if(c == '='){
                         //Unary Operator
                         m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
                         m_At+=2;
-                        continue;
+                        break;
                     }
                     //Arithmetic Operator
                     m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
