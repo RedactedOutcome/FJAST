@@ -9,7 +9,7 @@ class Test1{
         var y = i ** 5 + x;
 
         const i = "Hello WOrld\
-        ";
+        g";
 
         function(){
             console.log(y);

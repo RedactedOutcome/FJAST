@@ -154,12 +154,19 @@ namespace FJASTP{
                     /// @brief the position in the buffer the string is currently being copied from
                     /// @brief the string becomes a copy so we dont include unwanted characters like line breaks from the original code
                     size_t stringAt = m_At;
+                    size_t copyOffset = 0;
                     
                     while(true){
                         if(m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
                         char c = m_CurrentInput.At(m_At++);
-                        if(c == '"')break;
+                        if(c == '"'){
+                            stringData.Copy(copyOffset, m_CurrentInput.GetData() + stringAt, m_At - stringAt - 1);
+                            break;
+                        }
                         if(c == '\\'){
+                            size_t size = m_At - stringAt - 1;
+                            stringData.Copy(copyOffset, m_CurrentInput.GetData() + stringAt, size);
+                            copyOffset+=size;
                             c = m_CurrentInput.Get(++m_At);
                             if(c == '\12'){
                                 //New line
@@ -170,18 +177,18 @@ namespace FJASTP{
                                     m_At++;
                                     m_CurrentLineStart++;
                                 }
+                                stringAt = m_CurrentLineStart;
                             }else if(c == '\15'){
                                 //New line
                                 m_Line++;
                                 m_CurrentLineStart = m_At++;
+                                stringAt = m_CurrentLineStart;
                             }
                             m_At++;
                         }
 
                         if(c == '\12' || c == '\15')return TokenizeResult(m_Line, GetCurrentColumn() - 1, TokenizerError::InvalidStringLiteral);
                     }
-
-                    stringData.MemcpyFrom()
                     m_CurrentOutput->emplace_back(TokenType::StringLiteral, std::move(stringData), m_Line, GetCurrentColumn());
                     break;
                 }
