@@ -150,7 +150,10 @@ namespace FJASTP{
 
                     HBuffer stringData;
                     stringData.Reserve(10);
-                    size_t stringAt = 0;
+
+                    /// @brief the position in the buffer the string is currently being copied from
+                    /// @brief the string becomes a copy so we dont include unwanted characters like line breaks from the original code
+                    size_t stringAt = m_At;
                     
                     while(true){
                         if(m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
@@ -177,6 +180,8 @@ namespace FJASTP{
 
                         if(c == '\12' || c == '\15')return TokenizeResult(m_Line, GetCurrentColumn() - 1, TokenizerError::InvalidStringLiteral);
                     }
+
+                    stringData.MemcpyFrom()
                     m_CurrentOutput->emplace_back(TokenType::StringLiteral, std::move(stringData), m_Line, GetCurrentColumn());
                     break;
                 }
