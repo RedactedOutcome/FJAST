@@ -144,6 +144,42 @@ namespace FJASTP{
                     m_At++;
                     break;
                 }
+                case '"':{
+                    //String Literals
+                    size_t startAt = ++m_At;
+
+                    HBuffer stringData;
+                    stringData.Reserve(10);
+                    size_t stringAt = 0;
+                    
+                    while(true){
+                        if(m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
+                        char c = m_CurrentInput.At(m_At++);
+                        if(c == '"')break;
+                        if(c == '\\'){
+                            c = m_CurrentInput.Get(++m_At);
+                            if(c == '\12'){
+                                //New line
+                                m_Line++;
+                                m_CurrentLineStart = m_At++;
+                                c = m_CurrentInput.Get(++m_At);
+                                if(c == '\15'){
+                                    m_At++;
+                                    m_CurrentLineStart++;
+                                }
+                            }else if(c == '\15'){
+                                //New line
+                                m_Line++;
+                                m_CurrentLineStart = m_At++;
+                            }
+                            m_At++;
+                        }
+
+                        if(c == '\12' || c == '\15')return TokenizeResult(m_Line, GetCurrentColumn() - 1, TokenizerError::InvalidStringLiteral);
+                    }
+                    m_CurrentOutput->emplace_back(TokenType::StringLiteral, std::move(stringData), m_Line, GetCurrentColumn());
+                    break;
+                }
                 case '{':
                 case '}':
                 case '[':

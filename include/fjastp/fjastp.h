@@ -33,6 +33,7 @@ namespace FJASTP{
     enum class TokenizerError{
         Success=0,
         EndOfFile,
+        InvalidStringLiteral,
         UnsupportedToken,
         InternalLexingError,
         InvalidUTF8Character,
