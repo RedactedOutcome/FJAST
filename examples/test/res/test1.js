@@ -11,6 +11,7 @@ class Test1{
         const i = "Hello WOrld\
         g";
 
+        "Caps. This is a stringf number" "Capps"
         function(){
             console.log(y);
         }

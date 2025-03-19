@@ -292,7 +292,8 @@ namespace FJASTP{
                         m_At+=2;
                         break;
                     }
-                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At++, 1), m_Line, GetCurrentColumn());
+                    m_CurrentOutput->emplace_back(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), m_Line, GetCurrentColumn());
+                    m_At++;
                     break;
                 }
                 case '0':
