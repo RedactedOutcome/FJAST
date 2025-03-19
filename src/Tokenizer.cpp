@@ -127,15 +127,9 @@ namespace FJASTP{
                 case '+':{
                     char c = m_CurrentInput.Get(m_At + 1);
 
-                    if(c == '+'){
+                    if(c == '+' || c == '='){
                         //Unary Operator
                         m_CurrentOutput->emplace_back(TokenType::UnaryOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
-                        m_At+=2;
-                        break;
-                    }
-                    else if(c == '='){
-                        //Unary Operator
-                        m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
                         m_At+=2;
                         break;
                     }
@@ -144,41 +138,44 @@ namespace FJASTP{
                     m_At++;
                     break;
                 }
+                case '\'':
                 case '"':{
                     //String Literals
-                    size_t startAt = ++m_At;
+                    uint32_t startLine = m_Line;
+                    uint32_t startColumn = GetCurrentColumn();
+                    uint32_t startAt = ++m_At;
 
                     HBuffer stringData;
                     stringData.Reserve(10);
-
+                    
                     /// @brief the position in the buffer the string is currently being copied from
                     /// @brief the string becomes a copy so we dont include unwanted characters like line breaks from the original code
-                    size_t stringAt = m_At;
-                    size_t copyOffset = 0;
+                    uint32_t stringAt = m_At;
+                    uint32_t copyOffset = 0;
                     
                     while(true){
                         if(m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
-                        char c = m_CurrentInput.At(m_At++);
-                        if(c == '"'){
+                        char current= m_CurrentInput.At(m_At++);
+                        if(current == c){
                             stringData.Copy(copyOffset, m_CurrentInput.GetData() + stringAt, m_At - stringAt - 1);
                             break;
                         }
-                        if(c == '\\'){
-                            size_t size = m_At - stringAt - 1;
+                        if(current == '\\'){
+                            uint32_t size = m_At - stringAt - 1;
                             stringData.Copy(copyOffset, m_CurrentInput.GetData() + stringAt, size);
                             copyOffset+=size;
-                            c = m_CurrentInput.Get(++m_At);
-                            if(c == '\12'){
+                            current = m_CurrentInput.Get(++m_At);
+                            if(current == '\12'){
                                 //New line
                                 m_Line++;
                                 m_CurrentLineStart = m_At++;
-                                c = m_CurrentInput.Get(++m_At);
-                                if(c == '\15'){
+                                current = m_CurrentInput.Get(++m_At);
+                                if(current == '\15'){
                                     m_At++;
                                     m_CurrentLineStart++;
                                 }
                                 stringAt = m_CurrentLineStart;
-                            }else if(c == '\15'){
+                            }else if(current == '\15'){
                                 //New line
                                 m_Line++;
                                 m_CurrentLineStart = m_At++;
@@ -187,9 +184,9 @@ namespace FJASTP{
                             m_At++;
                         }
 
-                        if(c == '\12' || c == '\15')return TokenizeResult(m_Line, GetCurrentColumn() - 1, TokenizerError::InvalidStringLiteral);
+                        if(current == '\12' || current == '\15')return TokenizeResult(m_Line, GetCurrentColumn() - 1, TokenizerError::InvalidStringLiteral);
                     }
-                    m_CurrentOutput->emplace_back(TokenType::StringLiteral, std::move(stringData), m_Line, GetCurrentColumn());
+                    m_CurrentOutput->emplace_back(TokenType::StringLiteral, std::move(stringData), startLine, startColumn);
                     break;
                 }
                 case '{':
@@ -212,83 +209,14 @@ namespace FJASTP{
                     break;
                 }
                 case '.':{
-                    /// TODO: if we break the character loop we need to verify if a valid seperator/token is following it. Identifiers cant immediately follow without a white space or valid token
-                    char nextChar = m_CurrentInput.Get(m_At + 1);
-
-                    /*
-                    Bro we gotta start reading documentation before adding this kinda support for literals that arent allowed
-                    if(nextChar >= '0' && nextChar <= '9'){
-                        //Floating Point Numerical Literal
-                        uint32_t startAt = m_At;
-                        m_At+=2;
-
-                        //Scientific Notation
-                        bool usesNotation = false;
-                        bool isNotationNeg = false;
-                        uint8_t notationAt=0;
-                        while(true){
-                            if(m_At >= m_InputSize)break;
-                            char current = m_CurrentInput.At(m_At);
-
-                            if(current >= '0' && current <= '9'){
-                                m_At++;
-                                continue;
-                            }
-
-                            if(current == 'e' || current == 'E'){
-                                if(usesNotation)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                usesNotation = true;
-
-                                if(++m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
-                                current = m_CurrentInput.At(m_At);
-                                if(current == '-'){
-                                    isNotationNeg = true;
-                                    if(++m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
-                                    current = m_CurrentInput.At(m_At);
-                                }
-                                else if(current == '+'){
-                                    if(++m_At >= m_InputSize)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::EndOfFile);
-                                    current = m_CurrentInput.At(m_At);
-                                }
-
-                                uint32_t exponentStart = m_At;
-
-                                //Check for digits
-                                while(true){
-                                    current = m_CurrentInput.Get(m_At);
-                                    if(current >= '0' && current <= '9'){
-                                        m_At++;
-                                        continue;
-                                    }
-                                    break;
-                                }
-                                //Maybe have it be <=. Changed this code a daya fter writing and not sure
-                                if(m_At - exponentStart < 1)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                                continue;
-                            }
-                            break;
-                        }
-
-                        if(m_At < m_InputSize){
-                            char c = m_CurrentInput.At(m_At);
-                            if(!IsValidLiteralSplitter(c)){
-                                return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                            }
-                        }
-
-                        uint8_t metadata = 64 | (usesNotation ? (3 << 3) : 0) | (isNotationNeg ? 4 : 0);
-                        m_CurrentOutput->emplace_back(TokenType::NumericalLiteral, m_CurrentInput.SubPointer(startAt, m_At - startAt), metadata, m_Line, GetCurrentColumn());
-                        break;
-                    }
-                    */
                     m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At++, 1), m_Line, GetCurrentColumn());
                     break;
                 }
                 case '-':{
                     //Handle negation and urinary operators
                     char c = m_CurrentInput.Get(m_At + 1);
-                    if(c == '-'){
-                        m_CurrentOutput->emplace_back(TokenType::UnaryOperator, HBuffer("--", 2, false ,false), m_Line, GetCurrentColumn());
+                    if(c == '-' || c == '='){
+                        m_CurrentOutput->emplace_back(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
                         m_At+=2;
                         break;
                     }

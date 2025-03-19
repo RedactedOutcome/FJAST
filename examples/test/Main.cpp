@@ -42,7 +42,7 @@ int main(int argc, char** argv){
     
     if(!result){
         std::cout << "Error Tokenizing Javascript. Error " << (int)result.m_ErrorCode << " at " << result.m_Line << ":" << result.m_Column <<std::endl;
-        //return -1;
+        return -1;
     }
 
     std::cout << "Done Tokenizing"<<std::endl;
