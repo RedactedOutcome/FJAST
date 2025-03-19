@@ -11,7 +11,10 @@ class Test1{
         i-=15;
 
         const i = "Hello WOrld"
-'Hello'
+'Hello\
+Part2\
+Part3\
+'
 
         "Caps. This is a stringf number" "Capps"
         function(){

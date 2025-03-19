@@ -165,23 +165,30 @@ namespace FJASTP{
                             stringData.Copy(copyOffset, m_CurrentInput.GetData() + stringAt, size);
                             copyOffset+=size;
                             current = m_CurrentInput.Get(++m_At);
+
+                            ///TODO: fix characters being skipped here
                             if(current == '\12'){
                                 //New line
+                                std::cout << "T1"<<std::endl;
                                 m_Line++;
-                                m_CurrentLineStart = m_At++;
+                                m_CurrentLineStart = m_At+1;
                                 current = m_CurrentInput.Get(++m_At);
                                 if(current == '\15'){
+                                    std::cout << "T2"<<std::endl;
                                     m_At++;
                                     m_CurrentLineStart++;
                                 }
                                 stringAt = m_CurrentLineStart;
+                                std::cout << "Curremt is " << m_CurrentInput.Get(m_At)<<std::endl;
                             }else if(current == '\15'){
+                                std::cout << "T3"<<std::endl;
                                 //New line
                                 m_Line++;
                                 m_CurrentLineStart = m_At++;
                                 stringAt = m_CurrentLineStart;
                             }
                             m_At++;
+                            std::cout << "Curremt is " << m_CurrentInput.Get(m_At)<<std::endl;
                         }
 
                         if(current == '\12' || current == '\15')return TokenizeResult(m_Line, GetCurrentColumn() - 1, TokenizerError::InvalidStringLiteral);
