@@ -13,22 +13,22 @@ namespace FJASTP{
     /// @brief A class for storing javascript tokens.
     class Token{
     public:
-        Token(TokenType type, const HBuffer& value, size_t lineNumber, size_t columnNumber) noexcept;
-        Token(TokenType type, const HBuffer& value, uint8_t metadata, size_t lineNumber, size_t columnNumber) noexcept;
-        Token(TokenType type, HBuffer&& value, size_t lineNumber, size_t columnNumber) noexcept;
-        Token(TokenType type, HBuffer&& value, uint8_t metadata, size_t lineNumber, size_t columnNumber) noexcept;
+        Token(TokenType type, const HBuffer& value, uint32_t lineNumber, uint32_t columnNumber) noexcept;
+        Token(TokenType type, const HBuffer& value, uint8_t metadata, uint32_t lineNumber, uint32_t columnNumber) noexcept;
+        Token(TokenType type, HBuffer&& value, uint32_t lineNumber, uint32_t columnNumber) noexcept;
+        Token(TokenType type, HBuffer&& value, uint8_t metadata, uint32_t lineNumber, uint32_t columnNumber) noexcept;
 
         TokenType GetType() const noexcept{return (TokenType)m_Type;}
         HBuffer& GetValue() const noexcept{return (HBuffer&)m_Value;}
         uint8_t GetMetadata() const noexcept{return (uint8_t)m_Metadata;}
-        size_t GetLineNumber() const noexcept{return m_LineNumber;}
-        size_t GetColumnNumber() const noexcept{return m_ColumnNumber;}
+        uint32_t GetLineNumber() const noexcept{return m_LineNumber;}
+        uint32_t GetColumnNumber() const noexcept{return m_ColumnNumber;}
     private:
         TokenType m_Type;
         HBuffer m_Value;
         /// @brief stores extra metadata that is interpreted differently depending on the tokenType
         uint8_t m_Metadata;
-        size_t m_LineNumber;
-        size_t m_ColumnNumber;
+        uint32_t m_LineNumber;
+        uint32_t m_ColumnNumber;
     };
 }
