@@ -4,11 +4,11 @@ Configuration = Release
 TargetName = FJASTP
 Architecture = x64
 
-Config=$(Configuration)/$(Architecture)-$(Platform)/
-OutputDir = bin/$(TargetName)/$(Config)/
-IntDir = bin-int/$(TargetName)/$(Config)/
-ExampleOutputDir=bin/example/$(Config)
-ExampleIntDir=bin-int/example/$(Config)
+Config=$(Configuration)\\$(Architecture)-$(Platform)\\
+OutputDir = bin\\$(TargetName)\$(Config)
+IntDir = bin-int\\$(TargetName)\$(Config)
+ExampleOutputDir=bin\\example\\$(Config)
+ExampleIntDir=bin-int\\example\\$(Config)
 Include = include/
 
 MF =
@@ -36,8 +36,8 @@ default: build
 clean:
 	$(RF) bin-int
 make_folders:
-	$(MF) $(IntDir)
-	$(MF) $(OutputDir)
+	if not exist $(IntDir) mkdir $(IntDir)
+	if not exist $(OutputDir) mkdir $(OutputDir)
 build_pch: make_folders
 	$(CC) $(CFlags) $(LibCFlags) $(Defines) $(IncludeDirs) /Ycpch.h /Fp$(IntDir)pch.pch src/pch.cpp
 build: make_folders
