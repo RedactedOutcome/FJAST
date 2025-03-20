@@ -55,3 +55,5 @@ rebuild: make_folders build_pch build
 rebuildnrun:make_folders build_pch build run
 build_allnrun: build build_example run
 build_examplenrun: build_example run
+
+$(IntDir)pch.pch: build_pch
