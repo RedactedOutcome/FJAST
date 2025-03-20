@@ -40,7 +40,7 @@ make_folders:
 	if not exist $(OutputDir) mkdir $(OutputDir)
 build_pch: make_folders
 	$(CC) $(CFlags) $(LibCFlags) $(Defines) $(IncludeDirs) /Ycpch.h /Fp$(IntDir)pch.pch src/pch.cpp
-build: make_folders
+build: make_folders $(IntDir)pch.pch
 	$(CC) $(Files) $(CFlags) $(LibCFlags) $(Defines) $(IncludeDirs) /Yupch.h /Fp$(IntDir)pch.pch 
 	$(LibCreator) $(LFlags) $(LibFlags) $(LibDirs) $(Libs)
 build_example:
