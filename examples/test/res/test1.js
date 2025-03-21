@@ -14,7 +14,7 @@ class Test1{
 'Hello\
 Part2\
 Part3\
-'
+'test
 
         "Caps. This is a stringf number" "Capps"
         function(){
