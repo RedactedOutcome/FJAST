@@ -1,5 +1,6 @@
 bin/
 bin-int/
 .vscode/
-*.exe/
-*.sln/
+*.exe
+*.sln
+build/
