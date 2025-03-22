@@ -4,3 +4,8 @@ bin-int/
 *.exe
 *.sln
 build/
+cmake_install.cmake
+CMakeCache.txt
+*.a
+*.lib
+CMakeFiles/

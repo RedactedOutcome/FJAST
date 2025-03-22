@@ -20,5 +20,32 @@ target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/include/FJASTP/)
 
 target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/libs/HBuffer/include/)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/lib)  # Static libraries
-set(CMAKE_INTERMEDIATE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/int)  # Intermediate files (Custom)
+#Just keeping this even though we are probably never going to build for x86 ever
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    set(TARGET_ARCH "x64")
+elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
+    set(TARGET_ARCH "x86")
+endif()
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/FJASTP/${TARGET_ARCH}) #Output Directories
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/FJASTP/${TARGET_ARCH}) #Output Directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib/FJASTP/${TARGET_ARCH}) #Output Directories
+
+foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
+    string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
+    set_target_properties(FJASTP PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
+    )
+endforeach()
+
+# **Important: Fix for NMake Makefiles**
+if(CMAKE_GENERATOR MATCHES "NMake Makefiles")
+    set_target_properties(FJASTP PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib/FJASTP/${TARGET_ARCH}"
+    )
+endif()
+set_target_properties(FJASTP PROPERTIES
+    OBJECT_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/int
+)
