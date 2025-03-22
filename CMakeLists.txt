@@ -81,6 +81,6 @@ set_target_properties(FJASTPExample PROPERTIES
 #Run the program
 add_custom_target(run
     COMMAND $<TARGET_FILE:FJASTPExample>
-    WORKING_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     DEPENDS FJASTPExample
 )
