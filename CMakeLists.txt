@@ -49,3 +49,5 @@ endif()
 set_target_properties(FJASTP PROPERTIES
     OBJECT_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/int
 )
+
+project(FJASTExample)
