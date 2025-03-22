@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(FJASTP)
 
+option(BUILD_EXAMPLE "Build Example Executable" ON)  # Default to ON
+
 # Create a static library from the src/ folder
 file(GLOB SOURCES "src/*.cpp")
 add_library(FJASTP STATIC ${SOURCES})
@@ -67,17 +69,7 @@ if(CMAKE_GENERATOR MATCHES "NMake Makefiles")
     set_target_properties(FJASTP PROPERTIES
         ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}"
     )
-    set_target_properties(FJASTPExample PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/FJASTPExample/${TARGET_ARCH}"
-    )
 endif()
-set_target_properties(FJASTP PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/int/JFASTP/${TARGET_ARCH}
-)
-
-set_target_properties(FJASTPExample PROPERTIES
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/int/FJASTPExample/${TARGET_ARCH}
-)
 
 #Run the program
 add_custom_target(run
