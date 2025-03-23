@@ -8,11 +8,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)  # Ensure at least C++17 is used
 
 # Create a static library from the src/ folder
 file(GLOB SOURCES "src/*.cpp")
-add_library(FJASTP STATIC ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${SOURCES})
 
-target_precompile_headers(FJASTP PRIVATE include/FJASTP/pch.h)
+target_precompile_headers(${PROJECT_NAME} PRIVATE include/FJASTP/pch.h)
 if (MSVC)
-    target_sources(FJASTP PRIVATE src/pch.cpp)
+    target_sources(${PROJECT_NAME} PRIVATE src/pch.cpp)
 endif()
 
 #Output Directories
@@ -23,11 +23,11 @@ else()
 endif()
 
 # Include directory for public headers
-target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/src)
-target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/include/)
-target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/include/FJASTP/)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/src)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include/)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/include/${PROJECT_NAME}/)
 
-target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/libs/HBuffer/include/)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_SOURCE_DIR}/libs/HBuffer/include/)
 
 add_compile_definitions(FJASTP_USE_PCH FJASTP_PCH_DIR=\"FJASTP/pch.h\")
 
@@ -47,14 +47,14 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}
 
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
-    set_target_properties(FJASTP PROPERTIES
+    set_target_properties(${PROJECT_NAME} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG}  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
         LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG}  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
         ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG}  ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
     )
 endforeach()
 
-set_target_properties(FJASTP PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}

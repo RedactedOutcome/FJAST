@@ -22,7 +22,7 @@ int main(int argc, char** argv){
         size_t len = file.tellg();
         file.seekg(std::ios::beg);
         std::cout << "File is " << len << " bytes"<<std::endl;
-
+        
         char* data = new char[len];
         file.read(data, len);
         test1 = HBuffer(data, len, true, true);
