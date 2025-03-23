@@ -12,7 +12,8 @@ int main(int argc, char** argv){
 
     if(argc <= 1){
         std::cout << "Using test1.js"<<std::endl;
-        std::ifstream file("examples/test/res/test1.js", std::ios::binary | std::ios::ate);
+        std::cout << "Working dir " << argv[0]<<std::endl;
+        std::ifstream file("res/test1.js", std::ios::binary | std::ios::ate);
         if(!file){
             std::cout << "Failed to open file res/test1.js"<<std::endl;
             return -1;

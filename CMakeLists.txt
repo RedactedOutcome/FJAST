@@ -14,6 +14,14 @@ target_precompile_headers(FJASTP PRIVATE include/FJASTP/pch.h)
 if (MSVC)
     target_sources(FJASTP PRIVATE src/pch.cpp)
 endif()
+
+#Output Directories
+if(CMAKE_BUILD_TYPE)
+    set(BUILD_TYPE ${CMAKE_BUILD_TYPE}) # For Make, Ninja
+else()
+    set(BUILD_TYPE $<CONFIG>) # For Visual Studio, Xcode
+endif()
+
 # Include directory for public headers
 target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/include/)
@@ -33,9 +41,9 @@ elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(TARGET_ARCH "x86")
 endif()
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
 
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
