@@ -1,7 +1,10 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 project(FJASTP)
 
 option(BUILD_EXAMPLE "Build Example Executable" ON)  # Default to ON
+
+set(CMAKE_CXX_STANDARD 17)        # Set the C++ standard to C++17
+set(CMAKE_CXX_STANDARD_REQUIRED ON)  # Ensure at least C++17 is used
 
 # Create a static library from the src/ folder
 file(GLOB SOURCES "src/*.cpp")
@@ -11,16 +14,17 @@ target_precompile_headers(FJASTP PRIVATE include/FJASTP/pch.h)
 if (MSVC)
     target_sources(FJASTP PRIVATE src/pch.cpp)
 endif()
-
-set(CMAKE_CXX_STANDARD 17)        # Set the C++ standard to C++17
-set(CMAKE_CXX_STANDARD_REQUIRED ON)  # Ensure at least C++17 is used
-
 # Include directory for public headers
 target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/src)
 target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/include/)
 target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/include/FJASTP/)
 
 target_include_directories(FJASTP PUBLIC ${CMAKE_SOURCE_DIR}/libs/HBuffer/include/)
+
+add_compile_definitions(FJASTP_USE_PCH FJASTP_PCH_DIR=\"FJASTP/pch.h\")
+
+source_group(TREE ${CMAKE_SOURCE_DIR} PREFIX "Source" FILES src)
+source_group(TREE ${CMAKE_SOURCE_DIR} PREFIX "Include" FILES include)
 
 #Just keeping this even though we are probably never going to build for x86 ever
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -29,28 +33,16 @@ elseif(CMAKE_SIZEOF_VOID_P EQUAL 4)
     set(TARGET_ARCH "x86")
 endif()
 
-#Example
-add_executable(FJASTPExample examples/test/Main.cpp)
-target_link_libraries(FJASTPExample PRIVATE FJASTP)
-target_include_directories(FJASTPExample PUBLIC ${CMAKE_SOURCE_DIR}/libs/HBuffer/include/)
-target_include_directories(FJASTPExample PUBLIC ${CMAKE_SOURCE_DIR}/include/)
-
-#Output Directories
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}) #Output Directories
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}) #Output Directories
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}) #Output Directories
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}-${BUILD_TYPE}) #Output Directories
 
 foreach(OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES})
     string(TOUPPER ${OUTPUTCONFIG} OUTPUTCONFIG)
     set_target_properties(FJASTP PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
-        LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
-        ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
-    )
-    set_target_properties(FJASTPExample PROPERTIES
-        RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/bin/FJASTPExample/${TARGET_ARCH}
-        LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/bin/FJASTPExample/${TARGET_ARCH}
-        ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG} ${CMAKE_BINARY_DIR}/bin/FJASTPExample/${TARGET_ARCH}
+        RUNTIME_OUTPUT_DIRECTORY_${OUTPUTCONFIG}  ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}
+        LIBRARY_OUTPUT_DIRECTORY_${OUTPUTCONFIG}  ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+        ARCHIVE_OUTPUT_DIRECTORY_${OUTPUTCONFIG}  ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
     )
 endforeach()
 
@@ -59,21 +51,5 @@ set_target_properties(FJASTP PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
     ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY}
 )
-set_target_properties(FJASTPExample PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/FJASTPExample/${TARGET_ARCH}
-    LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/FJASTPExample/${TARGET_ARCH}
-    ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/FJASTPExample/${TARGET_ARCH}
-)
-# **Important: Fix for NMake Makefiles**
-if(CMAKE_GENERATOR MATCHES "NMake Makefiles")
-    set_target_properties(FJASTP PROPERTIES
-        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/${CMAKE_PROJECT_NAME}/${TARGET_ARCH}"
-    )
-endif()
 
-#Run the program
-add_custom_target(run
-    COMMAND $<TARGET_FILE:FJASTPExample>
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-    DEPENDS FJASTPExample
-)
+add_subdirectory("example/")
