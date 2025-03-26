@@ -13,10 +13,14 @@ namespace FJASTP{
     /// @brief A class for storing javascript tokens.
     class Token{
     public:
+        Token() noexcept: m_Type(TokenType::EndOfFile){}
         Token(TokenType type, const HBuffer& value, uint32_t lineNumber, uint32_t columnNumber) noexcept;
         Token(TokenType type, const HBuffer& value, uint8_t metadata, uint32_t lineNumber, uint32_t columnNumber) noexcept;
         Token(TokenType type, HBuffer&& value, uint32_t lineNumber, uint32_t columnNumber) noexcept;
         Token(TokenType type, HBuffer&& value, uint8_t metadata, uint32_t lineNumber, uint32_t columnNumber) noexcept;
+
+        Token(const Token& token) noexcept;
+        Token(Token&& token)noexcept;
 
         TokenType GetType() const noexcept{return (TokenType)m_Type;}
         HBuffer& GetValue() const noexcept{return (HBuffer&)m_Value;}

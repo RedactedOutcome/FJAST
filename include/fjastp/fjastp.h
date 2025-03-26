@@ -12,6 +12,7 @@ namespace FJASTP{
     };
 
     enum class TokenType{
+        EndOfFile=0,
         Identifier,
         Keyword,
         StringLiteral,
@@ -41,7 +42,9 @@ namespace FJASTP{
     };
 
     enum class ASTGeneratorError{
-        Success=0
+        Success=0,
+        InvalidClassDefinition,
+        UnsupportedSyntax
     };
 
     enum class NumericalLiteralBaseMetadataFormat : uint8_t{

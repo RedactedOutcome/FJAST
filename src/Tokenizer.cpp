@@ -483,7 +483,7 @@ namespace FJASTP{
         uint32_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
         uint8_t keyword = FJASTP::GetKeywordValue(buff);
-        TokenType tokenType = keyword ? TokenType::Keyword : TokenType::Identifier;
+        TokenType tokenType = keyword > 0 ? TokenType::Keyword : TokenType::Identifier;
         m_CurrentOutput->emplace_back(tokenType, std::move(buff), keyword, m_Line, GetCurrentColumn(startAt));
         //Success no need to return anything
         return TokenizeResult();

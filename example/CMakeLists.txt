@@ -33,3 +33,5 @@ add_custom_target(run
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/example/
     DEPENDS FJASTPExample
 )
+
+add_dependencies(${PROJECT_NAME} ${CMAKE_PROJECT_NAME})  
