@@ -51,12 +51,51 @@ namespace FJASTP{
         ScientificNotation=3
     };
 
+    enum class Keyword : uint8_t{
+        Await=1,
+        Break,
+        Case,
+        Catch,
+        Class,
+        Const,
+        Continue,
+        Debugger,
+        Default,
+        Delete,
+        Do,
+        Else,
+        Export,
+        Extends,
+        Finally,
+        For,
+        Function,
+        If,
+        Import,
+        In,
+        InstanceOf,
+        Let,
+        New,
+        Return,
+        Super,
+        Switch,
+        This,
+        Throw,
+        Try,
+        TypeOf,
+        Var,
+        Void,
+        While,
+        With,
+        Yield
+    };
+
     class FJASTP{
     public:
         static InitializationResult Init() noexcept;
 
-        static bool IsKeyword(const HBuffer& identifier) noexcept{return s_Keywords[identifier];}
+        static bool IsKeyword(const HBuffer& identifier) noexcept{return s_Keywords[identifier] > 0;}
+        static uint8_t GetKeywordValue(const HBuffer& identifier) noexcept{return s_Keywords[identifier];}
     private:
-        static std::unordered_map<HBuffer, bool> s_Keywords;
+        static std::unordered_map<HBuffer, uint8_t> s_Keywords;
     };
 }
