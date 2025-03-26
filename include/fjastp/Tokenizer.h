@@ -19,7 +19,7 @@ namespace FJASTP{
         TokenizeResult() noexcept: m_Line(0), m_Column(0), m_ErrorCode(TokenizerError::Success){}
         TokenizeResult(uint32_t line, uint32_t column) noexcept: m_Line(line), m_Column(column), m_ErrorCode(TokenizerError::Success){}
         TokenizeResult(uint32_t line, uint32_t column, TokenizerError errorCode) noexcept: m_Line(line), m_Column(column), m_ErrorCode(errorCode){}
-
+        
         constexpr operator bool() const noexcept{
             return m_ErrorCode == TokenizerError::Success;
         }

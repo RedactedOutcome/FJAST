@@ -40,7 +40,7 @@ namespace FJASTP{
         InvalidNumericalLiteral
     };
 
-    enum class ParserError{
+    enum class ASTGeneratorError{
         Success=0
     };
 

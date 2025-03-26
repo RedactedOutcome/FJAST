@@ -5,6 +5,7 @@
 
 #include "FJASTP.h"
 #include "FJASTP/Tokenizer.h"
+#include "FJASTP/ASTGenerator.h"
 
 int main(int argc, char** argv){
     std::cout<<"Hello World"<<std::endl;
@@ -52,5 +53,18 @@ int main(int argc, char** argv){
         FJASTP::Token& token = tokens[i];
         //TODO: add pad start functions to HBuffwer
         std::cout << "Token " << i << " " << token.GetLineNumber() << ":" << token.GetColumnNumber()<< " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;
+    }
+
+    FJASTP::ASTGenerator astGenerator;
+    std::vector<FJASTP::Node> ast; 
+    FJASTP::ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
+
+    if(!parseResult){
+        printf("Failed to parse ast %d", (uint8_t)parseResult.GetErrorCode());
+    }
+
+    for(size_t i = 0; i < ast.size(); i++){
+        FJASTP::Node& node = ast[i];
+        std::cout << "AST Program Child node %dis type %d", i, (int)node.GetNodeType());
     }
 }
