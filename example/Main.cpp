@@ -65,6 +65,6 @@ int main(int argc, char** argv){
 
     for(size_t i = 0; i < ast.size(); i++){
         FJASTP::Node& node = ast[i];
-        std::cout << "AST Program Child node %dis type %d", i, (int)node.GetNodeType());
+        printf("AST Program Child node %dis type %d", i, (int)node.GetNodeType());
     }
 }

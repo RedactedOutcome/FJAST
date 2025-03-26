@@ -19,7 +19,7 @@ namespace FJASTP{
         Node(std::vector<Node>&& children, void* left, void* right, NodeType type, uint8_t metadata)noexcept;
         Node(const Node& node) = delete;
         Node(Node&& node)noexcept;
-
+        
         std::vector<Node>& GetChildren() const noexcept{return (std::vector<Node>&)m_Children;}
         void* GetLeft() const noexcept{return m_Left;}
         void* GetRight() const noexcept{return m_Right;}
