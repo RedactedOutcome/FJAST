@@ -22,11 +22,16 @@ namespace FJASTP{
                 std::cout << "KEYWORD"<<std::endl;
                 switch(keyword){
                 case (uint8_t)Keyword::Class:{
-                    Token identifier = GetToken(m_At+1);
-                    if(identifier.GetType() != TokenType::Identifier)return ASTGeneratorResult(m_At + 1, ASTGeneratorError::InvalidClassDefinition);
+                    Token identifier = GetToken(++m_At);
+                    if(identifier.GetType() != TokenType::Identifier)return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
 
-                    
-                    m_At+=2;
+                    Token next = GetToken(m_At + 2);
+                    TokenType type = next.GetType();
+                    if(type == TokenType::Keyword){
+                        if(next.GetMetadata() == (uint8_t)Keyword::Extends){
+                            //Derived Class
+                        }
+                    }
                     break;
                 }
                 }

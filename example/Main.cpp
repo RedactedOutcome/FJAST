@@ -60,7 +60,8 @@ int main(int argc, char** argv){
     FJASTP::ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
 
     if(!parseResult){
-        printf("Failed to parse ast %d", (uint8_t)parseResult.GetErrorCode());
+        FJASTP::Token& errorToken = tokens[parseResult.GetErrorAt()];
+        printf("Failed to parse AST. Error %d at %d:%d", (uint8_t)parseResult.GetErrorCode(), errorToken.GetLineNumber(), errorToken.GetColumnNumber());
     }
 
     for(size_t i = 0; i < ast.size(); i++){
