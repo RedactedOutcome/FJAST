@@ -13,3 +13,6 @@ CMakeFiles/
 *.vcxproj.filters
 cmake_install.cmake
 CMakeCache.txt
+
+
+build/
