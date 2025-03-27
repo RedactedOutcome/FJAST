@@ -3,7 +3,17 @@
 
 namespace FJASTP{
 
-    ASTGeneratorResult ASTGenerator::ParseExpression(Token& output)noexcept{
+    ASTGeneratorResult ASTGenerator::ParseExpression(Node** output)noexcept{
+        Token t = GetToken(m_At);
+        TokenType type = t.GetType();
+        switch(type){
+        case TokenType::Identifier:{
+            output = /*Generate*/nullptr;
+            return ASTGeneratorResult();
+        }
+        default:
+            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidExpression);
+        }
         return ASTGeneratorResult();
     }
     ASTGeneratorResult ASTGenerator::Generate(std::vector<Token>& input, std::vector<Node>& output) noexcept{
@@ -39,7 +49,11 @@ namespace FJASTP{
                             m_At++;
 
                             //Get Class body
-                            
+                            Node expression;
+                            ASTGeneratorResult result = ParseExpression(&expression);
+                            if(!result)return result;
+
+                            std::cout << "Got expression"<<std::endl;
                             continue;
                         }
                         else{

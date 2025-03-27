@@ -44,6 +44,7 @@ namespace FJASTP{
     enum class ASTGeneratorError{
         Success=0,
         InvalidClassDefinition,
+        InvalidExpression,
         UnsupportedSyntax
     };
 

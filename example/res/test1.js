@@ -1,4 +1,4 @@
-class Test1{
+class Test1{ test
     constructor(){
         this.TestFunction1();
         //sdfasdf

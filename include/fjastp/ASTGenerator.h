@@ -28,7 +28,7 @@ namespace FJASTP{
 
         Token GetToken(size_t at) const noexcept{if(at < 0 || at >= m_TokenCount)return Token(); return m_Input->at(at);}
     private:
-        ASTGeneratorResult ParseExpression(Token& output)noexcept;
+        ASTGeneratorResult ParseExpression(Node** output)noexcept;
     private:
         std::vector<Token>* m_Input;
         std::vector<Node>* m_Output;
