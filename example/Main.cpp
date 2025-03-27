@@ -63,7 +63,7 @@ int main(int argc, char** argv){
         FJASTP::Token& errorToken = tokens[parseResult.GetErrorAt()];
         printf("Failed to parse AST. Error %d at %d:%d", (uint8_t)parseResult.GetErrorCode(), errorToken.GetLineNumber(), errorToken.GetColumnNumber());
     }
-
+    
     for(size_t i = 0; i < ast.size(); i++){
         FJASTP::Node& node = ast[i];
         printf("AST Program Child node %dis type %d", i, (int)node.GetNodeType());

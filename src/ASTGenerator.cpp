@@ -25,11 +25,25 @@ namespace FJASTP{
                     Token identifier = GetToken(++m_At);
                     if(identifier.GetType() != TokenType::Identifier)return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
 
-                    Token next = GetToken(m_At + 2);
+                    Token next = GetToken(++m_At);
                     TokenType type = next.GetType();
                     if(type == TokenType::Keyword){
                         if(next.GetMetadata() == (uint8_t)Keyword::Extends){
                             //Derived Class
+                            Token extendedClass = GetToken(++m_At);
+                            if(extendedClass.GetType() != TokenType::Identifier)return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                            
+                            if(GetToken(++m_At).GetValue() != "{"){
+                                return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                            }
+                            m_At++;
+
+                            //Get Class body
+                            
+                            continue;
+                        }
+                        else{
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                         }
                     }
                     break;

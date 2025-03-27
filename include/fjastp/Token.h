@@ -27,6 +27,9 @@ namespace FJASTP{
         uint8_t GetMetadata() const noexcept{return (uint8_t)m_Metadata;}
         uint32_t GetLineNumber() const noexcept{return m_LineNumber;}
         uint32_t GetColumnNumber() const noexcept{return m_ColumnNumber;}
+    public:
+        Token& operator=(const Token& token)noexcept;
+        Token& operator=(Token&& token)noexcept;
     private:
         TokenType m_Type;
         HBuffer m_Value;
