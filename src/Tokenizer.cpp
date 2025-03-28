@@ -205,11 +205,8 @@ namespace FJASTP{
                 case ',':
                 case ';':
                 case '`':
-                case '?':{
-                    m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At, 1), m_Line, GetCurrentColumn());
-                    m_At++;
-                    break;
-                }
+                case '?':
+                case '#':
                 case '.':{
                     m_CurrentOutput->emplace_back(TokenType::Punctuator, m_CurrentInput.SubPointer(m_At++, 1), m_Line, GetCurrentColumn());
                     break;

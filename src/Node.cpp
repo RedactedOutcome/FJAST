@@ -11,6 +11,7 @@ namespace FJASTP{
         m_Right = right;
     }
     Node::Node(Node&& node)noexcept{
+        CleanUp();
         m_Children = std::move(node.m_Children);
         m_Type = node.m_Type;
         m_Metadata = node.m_Metadata;
@@ -24,6 +25,7 @@ namespace FJASTP{
     }
 
     Node& Node::operator=(Node&& node) noexcept{
+        CleanUp();
         m_Children = std::move(node.m_Children);
         m_Type = node.m_Type;
         m_Metadata = node.m_Metadata;
@@ -35,5 +37,11 @@ namespace FJASTP{
         node.m_Metadata = 0;
         node.m_Type = NodeType::None;
         return *this;
+    }
+
+    void Node::CleanUp()noexcept{
+        switch(m_Type){
+
+        }
     }
 }

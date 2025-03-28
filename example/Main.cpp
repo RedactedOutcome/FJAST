@@ -41,7 +41,7 @@ int main(int argc, char** argv){
     FJASTP::Tokenizer t;
     std::vector<FJASTP::Token> tokens;
     FJASTP::TokenizeResult result = t.Tokenize(test1, tokens);
-    
+
     if(!result){
         std::cout << "Error Tokenizing Javascript. Error " << (int)result.m_ErrorCode << " at " << result.m_Line << ":" << result.m_Column <<std::endl;
         return -1;
@@ -56,7 +56,8 @@ int main(int argc, char** argv){
     }
 
     FJASTP::ASTGenerator astGenerator;
-    std::vector<FJASTP::Node> ast; 
+    std::vector<FJASTP::Node*> ast; 
+    ast.reserve(1000);
     FJASTP::ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
 
     if(!parseResult){
@@ -65,7 +66,7 @@ int main(int argc, char** argv){
     }
     
     for(size_t i = 0; i < ast.size(); i++){
-        FJASTP::Node& node = ast[i];
+        FJASTP::Node& node = *ast[i];
         printf("AST Program Child node %dis type %d", i, (int)node.GetNodeType());
     }
 }

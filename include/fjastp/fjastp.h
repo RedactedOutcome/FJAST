@@ -43,6 +43,7 @@ namespace FJASTP{
 
     enum class ASTGeneratorError{
         Success=0,
+        EndOfFile,
         InvalidClassDefinition,
         InvalidExpression,
         UnsupportedSyntax
@@ -93,6 +94,15 @@ namespace FJASTP{
         Yield
     };
 
+    enum class NodeType : uint8_t{
+        None=0,
+        Expression,
+        Literal
+    };
+
+    enum class ExpressionType : uint8_t{
+
+    };
     class FJASTP{
     public:
         static InitializationResult Init() noexcept;

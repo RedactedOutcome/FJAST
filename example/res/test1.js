@@ -1,4 +1,4 @@
-class Test1{ test
+class Test1 extends Hello{ test
     constructor(){
         this.TestFunction1();
         //sdfasdf
@@ -14,11 +14,11 @@ class Test1{ test
 'Hello\
 Part2\
 Part3\
-'test
+'
 
         "Caps. This is a stringf number" "Capps"
-        function(){
-            console.log(y);
-        }
+    }
+    saycap(param1){
+        console.log(y);
     }
 }

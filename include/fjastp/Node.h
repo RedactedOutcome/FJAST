@@ -7,19 +7,20 @@
 #include <cstdint>
 #endif
 
+#include "fjastp.h"
+
 namespace FJASTP{
-
-    enum class NodeType : uint8_t{
-        None=0,
-
-    };
     class Node{
     public:
+        friend class ASTGenerator;
         Node() noexcept;
         Node(std::vector<Node>&& children, void* left, void* right, NodeType type, uint8_t metadata)noexcept;
         Node(const Node& node) = delete;
         Node(Node&& node)noexcept;
-        
+
+        //Automatically handles freeing memory
+        void CleanUp()noexcept;
+    public:
         std::vector<Node>& GetChildren() const noexcept{return (std::vector<Node>&)m_Children;}
         void* GetLeft() const noexcept{return m_Left;}
         void* GetRight() const noexcept{return m_Right;}
