@@ -29,13 +29,14 @@ namespace FJASTP{
         ASTGeneratorResult Generate(std::vector<Token>& input, std::vector<Node*>& output) noexcept;
 
         Token GetToken(size_t at) const noexcept{if(at < 0 || at >= m_TokenCount)return Token(); return m_Input->at(at);}
-
+        Token& AtToken(size_t at) const noexcept{return (Token&)m_Input[at];}
         /// @brief Allocates a new node on the node pool and returns its address
         /// @brief We allocate in pool so nodes are grouped close together. We also have a custom allocater
         Node* AllocateNode()const noexcept;
         SegmentedPool<Node>& GetNodePool() const noexcept{return (SegmentedPool<Node>&)m_NodePool;}
     private:
         ASTGeneratorResult ParseExpression(Node* output)noexcept;
+        ASTGeneratorResult ParseType(Node* output)noexcept;
 
         ASTGeneratorResult ParseCurrentToken(std::vector<Node*>& output)noexcept;
     private:

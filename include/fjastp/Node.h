@@ -14,7 +14,9 @@ namespace FJASTP{
     public:
         friend class ASTGenerator;
         Node() noexcept;
-        Node(std::vector<Node>&& children, void* left, void* right, NodeType type, uint8_t metadata)noexcept;
+        Node(std::vector<Node*>&& children, void* left, void* right, NodeType type, uint8_t metadata)noexcept;
+        Node(void* left, void* right, NodeType type, uint8_t metadata)noexcept;
+        Node(NodeType type)noexcept: m_Type(type){}
         Node(const Node& node) = delete;
         Node(Node&& node)noexcept;
 
@@ -30,7 +32,7 @@ namespace FJASTP{
         Node& operator=(const Node& node) = delete;
         Node& operator=(Node&&) noexcept;
     private:
-        std::vector<Node> m_Children;
+        std::vector<Node*> m_Children;
         void* m_Left = nullptr;
         void* m_Right = nullptr;
         NodeType m_Type = NodeType::None;

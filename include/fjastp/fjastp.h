@@ -46,6 +46,11 @@ namespace FJASTP{
         EndOfFile,
         InvalidClassDefinition,
         InvalidExpression,
+        ExpectedExpressionOrStatement,
+        InvalidMethodDeclaration,
+        InvalidMethodBody,
+        InvalidFunctionDeclaration,
+        InvalidFunctionBody,
         UnsupportedSyntax
     };
 
@@ -97,7 +102,11 @@ namespace FJASTP{
     enum class NodeType : uint8_t{
         None=0,
         Expression,
-        Literal
+        Literal,
+        ClassDeclaration,
+        FunctionDeclaration,
+        MethodDeclaration,
+        MemeberDeclaration
     };
 
     enum class ExpressionType : uint8_t{

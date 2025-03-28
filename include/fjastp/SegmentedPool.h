@@ -33,13 +33,13 @@ namespace FJASTP{
             return &(m_Pool[m_Pool.size() - 1]->at(m_PoolIndex++));
         }
         template <typename... Args>
-        T* Allocate(Args&&... args)noexcept{
+        T* Allocate(Args&&... args) noexcept{
             if(m_PoolIndex >= PoolSize){
                 m_PoolIndex = 0;
                 m_Pool.push_back(new std::array<T, PoolSize>());
             }
             T* t = &(m_Pool[m_Pool.size() - 1]->at(m_PoolIndex++));
-            *t = std::move(T(std::forward(args)...));
+            *t = std::move(T(std::forward<Args>(args)...));
             return t;
         }
     private:
