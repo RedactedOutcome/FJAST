@@ -1,8 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"C:/Projects/FJASTP/build/cmake_install.cmake",
-		"C:/Projects/FJASTP/build/example/cmake_install.cmake"
-	],
-	"Parallel" : false
-}
