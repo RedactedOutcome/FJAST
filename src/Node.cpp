@@ -46,7 +46,10 @@ namespace FJASTP{
 
     void Node::CleanUp()noexcept{
         switch(m_Type){
-
+            case NodeType::MethodDeclaration:{
+                ///@brief m_Right is an allocated pointer to a vector that points to identifier tokens for parameters
+                delete m_Right;
+            }
         }
         
         m_Children.clear();

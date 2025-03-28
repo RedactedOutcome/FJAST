@@ -11,6 +11,7 @@ namespace FJASTP{
             //std::cout << "Current node size is " << (size_t)currentToken.GetValue().GetData() << std::endl;
             //Node* node = m_NodePool.Allocate((void*)&AtToken(m_At).GetValue(), (void*)nullptr, NodeType::Expression, 0);
             *output = Node((void*)&AtToken(m_At).GetValue(), (void*)nullptr, NodeType::Expression, 0);
+            m_At++;
             return ASTGeneratorResult();
         }
         default:
@@ -27,6 +28,7 @@ namespace FJASTP{
             case TokenType::EndOfFile:
                 return ASTGeneratorResult(ASTGeneratorError::EndOfFile);
             case TokenType::Identifier:{
+                size_t startAt = m_At;
                 Token current = GetToken(m_At + 1);
 
                 if(current.GetValue() == "("){
@@ -49,17 +51,38 @@ namespace FJASTP{
                     current = GetToken(++m_At);
                     if(current.GetValue() != "{")
                         return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidMethodBody);
+                    m_At++;
                     std::cout << "Getting method"<<std::endl;
+                    std::cout << "Current token is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
+
                     //Parse function body
                     std::vector<Node*> body;
                     while(true){
                         ASTGeneratorResult result = ParseCurrentToken(body);
                         if(!result)break;
-                        m_At++;
                     }
+                    std::cout << "After body"<<std::endl;
+                    std::cout << "1 Current token is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
 
                     if(GetToken(m_At).GetValue() != "}")return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidMethodBody);
                     m_At++;
+                    std::cout << "2 Current token is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
+
+                    //APpend an actual node
+
+                    /// @brief an allocated copy of parameters that exist on the heap and the node own
+                    std::vector<Token*>* allocatedParameters = new std::vector<Token*>();
+                    allocatedParameters->reserve(parameters.size());
+                    for(size_t i = 0; i < parameters.size(); i++)
+                        allocatedParameters->emplace_back(parameters[i]);
+                    
+                    /// @brief Function Identifier
+                    void* left = &AtToken(startAt).GetValue();
+                    /// @brief Function Parameters
+                    void* right = static_cast<void*>(allocatedParameters);
+                    uint8_t metadata = 0;
+                    Node* methodDeclaration = m_NodePool.Allocate(std::move(body), left, right, NodeType::MethodDeclaration, metadata);
+                    output.push_back(methodDeclaration);
                 }
 
                 return ASTGeneratorResult(m_At, ASTGeneratorError::ExpectedExpressionOrStatement);
@@ -91,10 +114,10 @@ namespace FJASTP{
                                 ASTGeneratorResult result;
                                 while(true){
                                     std::cout << "Current token " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
+                                    std::cout << "At before " << m_At<<std::endl;
                                     result = ParseCurrentToken(body);
+                                    std::cout << "At after " << m_At <<std::endl;
                                     if(!result)break;
-                                    std::cout<<"T1"<<std::endl;
-                                    m_At++;
                                 }
 
                                 std::cout <<"Showing body"<<std::endl;
@@ -112,7 +135,7 @@ namespace FJASTP{
                                 }
     
                                 Token t = GetToken(m_At);
-                                std::cout <<"Current token value is "<< t.GetValue().SubString(0,-1).GetCStr()<<std::endl;
+                                std::cout <<"a Current token value is "<< t.GetValue().SubString(0,-1).GetCStr()<<std::endl;
                                 if(t.GetValue() != "}"){
                                     return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                                 }
