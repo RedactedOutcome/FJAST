@@ -1,5 +1,3 @@
-class Test1 extends Hello{
-    getMethod(){}
-    
-    Method2(){}
+class Class1{
+    Method1(){}
 }

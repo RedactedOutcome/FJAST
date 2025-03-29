@@ -34,26 +34,29 @@ namespace FJASTP{
                 if(current.GetValue() == "("){
                     //Method Declaration
                     m_At+=2;
-                    std::vector<Token*> parameters;
+                    /// @brief an allocated copy of parameters that exist on the heap and the node own
+                    std::vector<Token*>* allocatedParameters = new std::vector<Token*>();
 
                     while(true){
                         current = GetToken(m_At);
                         if((uint8_t)current.GetType() == (uint8_t)TokenType::Identifier){
-                            parameters.emplace_back(&m_Input->at(m_At++));
+                            allocatedParameters->emplace_back(&m_Input->at(m_At++));
                             continue;
                         }
                         break;
                     }
 
                     current = GetToken(m_At);
-                    if(current.GetValue() != ")")
+                    if(current.GetValue() != ")"){
+                        delete allocatedParameters;
                         return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidMethodDeclaration);
+                    }
                     current = GetToken(++m_At);
-                    if(current.GetValue() != "{")
+                    if(current.GetValue() != "{"){
+                        delete allocatedParameters;
                         return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidMethodBody);
+                    }
                     m_At++;
-                    std::cout << "Getting method"<<std::endl;
-                    std::cout << "Current token is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
 
                     //Parse function body
                     std::vector<Node*> body;
@@ -61,20 +64,12 @@ namespace FJASTP{
                         ASTGeneratorResult result = ParseCurrentToken(body);
                         if(!result)break;
                     }
-                    std::cout << "After body"<<std::endl;
-                    std::cout << "1 Current token is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
 
-                    if(GetToken(m_At).GetValue() != "}")return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidMethodBody);
+                    if(GetToken(m_At).GetValue() != "}"){
+                        delete allocatedParameters;
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidMethodBody);
+                    }
                     m_At++;
-                    std::cout << "2 Current token is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
-
-                    //APpend an actual node
-
-                    /// @brief an allocated copy of parameters that exist on the heap and the node own
-                    std::vector<Token*>* allocatedParameters = new std::vector<Token*>();
-                    allocatedParameters->reserve(parameters.size());
-                    for(size_t i = 0; i < parameters.size(); i++)
-                        allocatedParameters->emplace_back(parameters[i]);
                     
                     /// @brief Function Identifier
                     void* left = &AtToken(startAt).GetValue();
@@ -83,13 +78,13 @@ namespace FJASTP{
                     uint8_t metadata = 0;
                     Node* methodDeclaration = m_NodePool.Allocate(std::move(body), left, right, NodeType::MethodDeclaration, metadata);
                     output.push_back(methodDeclaration);
+                    return ASTGeneratorResult();
                 }
 
                 return ASTGeneratorResult(m_At, ASTGeneratorError::ExpectedExpressionOrStatement);
             }
             case TokenType::Keyword:{
                 uint8_t keyword = currentToken.GetMetadata();
-                std::cout << "KEYWORD"<<std::endl;
                 switch(keyword){
                     case (uint8_t)Keyword::Class:{
                         Token identifier = GetToken(++m_At);
@@ -109,38 +104,18 @@ namespace FJASTP{
                                 m_At++;
 
                                 //Get Class body
-
                                 std::vector<Node*> body;
                                 ASTGeneratorResult result;
                                 while(true){
-                                    std::cout << "Current token " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
-                                    std::cout << "At before " << m_At<<std::endl;
                                     result = ParseCurrentToken(body);
-                                    std::cout << "At after " << m_At <<std::endl;
                                     if(!result)break;
                                 }
 
-                                std::cout <<"Showing body"<<std::endl;
-                                for(size_t i = 0; i < body.size(); i++){
-                                    Node& node = *body[i];
-                                    switch((uint8_t)node.GetNodeType()){
-                                    case (uint8_t)NodeType::Expression:{
-                                        if(node.m_Metadata == 0){
-                                            HBuffer* buffer = ((HBuffer*)node.GetLeft());
-                                            std::cout << "Got buffer " << buffer->SubString(0,-1).GetCStr() << std::endl;
-                                        }
-                                    }
-                                    }
-                                    std::cout<<std::endl;
-                                }
-    
                                 Token t = GetToken(m_At);
-                                std::cout <<"a Current token value is "<< t.GetValue().SubString(0,-1).GetCStr()<<std::endl;
                                 if(t.GetValue() != "}"){
                                     return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                                 }
                                 m_At++;
-                                std::cout << "Got Class decleration"<<std::endl;
                                 void* left = nullptr;
                                 void* right = nullptr;
                                 uint8_t metadata = 0;

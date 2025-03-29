@@ -60,7 +60,7 @@ namespace FJASTP{
         Hexidecimal=2,
         ScientificNotation=3
     };
-
+    
     enum class Keyword : uint8_t{
         Await=1,
         Break,
