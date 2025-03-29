@@ -36,14 +36,19 @@ namespace FJASTP{
                     /// @brief an allocated copy of parameters that exist on the heap and the node own
                     std::vector<Token*>* allocatedParameters = new std::vector<Token*>();
 
-                    while(true){
-                        current = GetToken(m_At);
-                        if((uint8_t)current.GetType() != (uint8_t)TokenType::Identifier)
-                            break;
+                    Token current = GetToken(m_At);
+                    if(current.GetType() == TokenType::Identifier){
                         allocatedParameters->emplace_back(&m_Input->at(m_At++));
-                        if(GetToken(m_At).GetValue() == ","){
-                            m_At++;
-                            continue;
+
+                        //Get Rest of the Parameters
+                        while(true){
+                            if(GetToken(m_At).GetValue() != ",")break;
+                            current = GetToken(++m_At);
+                            if((uint8_t)current.GetType() != (uint8_t)TokenType::Identifier){
+                                delete allocatedParameters;
+                                return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidParameterList);
+                            }
+                            allocatedParameters->emplace_back(&m_Input->at(m_At++));
                         }
                     }
 
@@ -110,7 +115,7 @@ namespace FJASTP{
                         if(next.GetValue() != "{")
                             return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                         m_At++;
-
+                        
                         //Get Class body
                         std::vector<Node*> body;
                         ASTGeneratorResult result;
@@ -121,7 +126,7 @@ namespace FJASTP{
 
                         Token t = GetToken(m_At);
                         if(t.GetValue() != "}"){
-                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                            return result;
                         }
                         m_At++;
                         void* left = &m_Input->at(identifierAt).GetValue();

@@ -1,5 +1,5 @@
 class HelloTest1 extends cap{
-    print(args1,){
+    print(args1,Update){
         
     }
 }

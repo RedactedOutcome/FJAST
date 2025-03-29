@@ -19,6 +19,7 @@ namespace FJASTP{
         Node(NodeType type)noexcept: m_Type(type){}
         Node(const Node& node) = delete;
         Node(Node&& node)noexcept;
+        ~Node()noexcept;
 
         //Automatically handles freeing memory
         void CleanUp()noexcept;

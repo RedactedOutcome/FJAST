@@ -51,7 +51,8 @@ namespace FJASTP{
         InvalidMethodBody,
         InvalidFunctionDeclaration,
         InvalidFunctionBody,
-        UnsupportedSyntax
+        UnsupportedSyntax,
+        InvalidParameterList
     };
 
     enum class NumericalLiteralBaseMetadataFormat : uint8_t{

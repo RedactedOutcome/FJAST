@@ -43,6 +43,9 @@ namespace FJASTP{
         node.m_Type = NodeType::None;
         return *this;
     }
+    Node::~Node()noexcept{
+        CleanUp();
+    }
 
     void Node::CleanUp()noexcept{
         switch(m_Type){
