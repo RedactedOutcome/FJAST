@@ -52,7 +52,8 @@ namespace FJASTP{
         InvalidFunctionDeclaration,
         InvalidFunctionBody,
         UnsupportedSyntax,
-        InvalidParameterList
+        InvalidParameterList,
+        InvalidPropertyAccessExpression
     };
 
     enum class NumericalLiteralBaseMetadataFormat : uint8_t{
@@ -102,17 +103,15 @@ namespace FJASTP{
 
     enum class NodeType : uint8_t{
         None=0,
-        Expression,
+        IdentifierExpression,
         Literal,
         ClassDeclaration,
         FunctionDeclaration,
         MethodDeclaration,
-        MemeberDeclaration
+        MemeberDeclaration,
+        PropertyAccessExpression
     };
 
-    enum class ExpressionType : uint8_t{
-
-    };
     class  FJastP{
     public:
         static InitializationResult Init() noexcept;

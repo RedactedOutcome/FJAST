@@ -7,9 +7,31 @@ namespace FJASTP{
         Token t = GetToken(m_At);
         TokenType type = t.GetType();
         switch(type){
+        case TokenType::EndOfFile:
+            return ASTGeneratorResult(ASTGeneratorError::EndOfFile);
         case TokenType::Identifier:{
+            uint32_t startIdentifier = m_At;
+            Token next = GetToken(m_At + 1);
+            if(next.GetValue() == "."){
+                //Is a property access
+                /*
+                next = GetToken(m_At + 2);
+                if(next.GetType() != TokenType::Identifier){
+                    return ASTGeneratorResult(m_AT, ASTGeneratorError::InvalidPropertyAccessExpression);
+                }
+                */
+                Node* right = m_NodePool.Allocate();
+                ASTGeneratorResult result = ParseExpression(right);
+                if(!result)return result;
+
+                NodeType type = right->GetNodeType();
+                if(type != NodeType::PropertyAccessExpression && type != NodeType::IdentifierExpression)return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidPropertyAccessExpression);
+
+                *output = Node(&m_Input->at(startIdentifier), right, NodeType::PropertyAccessExpression, 0);
+                return ASTGeneratorResult();
+            }
             /// TODO: Check for operators
-            *output = Node((void*)&AtToken(m_At).GetValue(), (void*)nullptr, NodeType::Expression, 0);
+            *output = Node((void*)&AtToken(m_At).GetValue(), (void*)nullptr, NodeType::IdentifierExpression, 0);
             m_At++;
             return ASTGeneratorResult();
         }
@@ -137,8 +159,16 @@ namespace FJASTP{
                         return ASTGeneratorResult();
                         break;
                     }
-                    default:
-                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
+                    default:{
+                        Node* node = m_NodePool.Allocate();
+                        ASTGeneratorResult result = ParseExpression(node);
+
+                        if(result){
+                            //Check for operators
+                            
+                        }
+                        return result;
+                    }
                 }
             }
         default:
