@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <fstream>
+#include <chrono>
 
 #include "FJASTP.h"
 #include "FJASTP/Tokenizer.h"
@@ -39,6 +40,7 @@ int main(int argc, char** argv){
         return -1;
     }
 
+    auto t1 = std::chrono::high_resolution_clock::now();
     Tokenizer t;
     std::vector<Token> tokens;
     TokenizeResult result = t.Tokenize(test1, tokens);
@@ -48,8 +50,10 @@ int main(int argc, char** argv){
         return -1;
     }
 
-    std::cout << "Done Tokenizing"<<std::endl;
-    
+    auto t2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration = t2 - t1;
+    std::cout << "Tokenizing time: " << duration.count() << " seconds\n";
+
     for(size_t i = 0; i < tokens.size(); i++){
         //Token& token = tokens[i];
         //TODO: add pad start functions to HBuffwer
@@ -59,6 +63,9 @@ int main(int argc, char** argv){
     ASTGenerator astGenerator;
     std::vector<Node*> ast; 
     ast.reserve(1000);
+    
+    auto t3 = std::chrono::high_resolution_clock::now();
+
     std::cout <<"Parsing phase"<<std::endl;
     ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
     std::cout <<"Done Parsing"<<std::endl;
@@ -68,7 +75,11 @@ int main(int argc, char** argv){
         printf("Failed to parse AST. Error %d at %d:%d\n", (uint8_t)parseResult.GetErrorCode(), errorToken.GetLineNumber(), errorToken.GetColumnNumber());
         return -1;
     }
-    
+    auto t4 = std::chrono::high_resolution_clock::now();
+    duration = t4 - t3;
+    std::cout << "AST Generation time: " << duration.count() << " seconds\n";
+
+    /*
     for(size_t i = 0; i < ast.size(); i++){
         Node& node = *ast[i];
         printf("AST Program Child node %d is type %d\n", i, (int)node.GetNodeType());
@@ -82,4 +93,5 @@ int main(int argc, char** argv){
             }
         }
     }
+    */
 }

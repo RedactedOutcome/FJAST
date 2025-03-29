@@ -107,8 +107,7 @@ namespace FJASTP{
                         if(next.GetValue() != "{")
                             return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                         m_At++;
-
-                        std::cout << "Getting body"<<std::endl;
+                        
                         //Get Class body
                         std::vector<Node*> body;
                         ASTGeneratorResult result;
@@ -116,7 +115,6 @@ namespace FJASTP{
                             result = ParseCurrentToken(body);
                             if(!result)break;
                         }
-                        std::cout << "done body"<<std::endl;
 
                         Token t = GetToken(m_At);
                         if(t.GetValue() != "}"){
