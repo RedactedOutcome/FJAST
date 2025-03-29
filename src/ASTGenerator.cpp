@@ -31,7 +31,7 @@ namespace FJASTP{
                 Token current = GetToken(m_At + 1);
 
                 if(current.GetValue() == "("){
-                    //Method Declaration
+                    //Method Declaration Or call
                     m_At+=2;
                     /// @brief an allocated copy of parameters that exist on the heap and the node own
                     std::vector<Token*>* allocatedParameters = new std::vector<Token*>();

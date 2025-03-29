@@ -22,6 +22,7 @@ namespace FJASTP{
         }
     };
 
+    /// @brief Does a Syntactic Analysis and generates ast. Doesnt completely do Semantic Analysis.
     class ASTGenerator{
     public:
         /// @brief Generates an abstract syntax tree from a list of tokens.
