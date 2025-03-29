@@ -38,11 +38,13 @@ namespace FJASTP{
 
                     while(true){
                         current = GetToken(m_At);
-                        if((uint8_t)current.GetType() == (uint8_t)TokenType::Identifier){
-                            allocatedParameters->emplace_back(&m_Input->at(m_At++));
+                        if((uint8_t)current.GetType() != (uint8_t)TokenType::Identifier)
+                            break;
+                        allocatedParameters->emplace_back(&m_Input->at(m_At++));
+                        if(GetToken(m_At).GetValue() == ","){
+                            m_At++;
                             continue;
                         }
-                        break;
                     }
 
                     current = GetToken(m_At);
@@ -100,6 +102,7 @@ namespace FJASTP{
                                 if(GetToken(derivedFromAt).GetType() != TokenType::Identifier)return ASTGeneratorResult(derivedFromAt, ASTGeneratorError::InvalidClassDefinition);
                                 derivedFrom = static_cast<void*>(&m_Input->at((size_t)derivedFromAt).GetValue());
                                 m_At++;
+                                next = GetToken(m_At);
                             }else{
                                 return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                             }
@@ -107,7 +110,7 @@ namespace FJASTP{
                         if(next.GetValue() != "{")
                             return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                         m_At++;
-                        
+
                         //Get Class body
                         std::vector<Node*> body;
                         ASTGeneratorResult result;
