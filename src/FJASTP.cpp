@@ -2,9 +2,9 @@
 #include "FJASTP/FJASTP.h"
 
 namespace FJASTP{
-    std::unordered_map<HBuffer, uint8_t> FJASTP::s_Keywords;
+    std::unordered_map<HBuffer, uint8_t> FJastP::s_Keywords;
 
-    InitializationResult FJASTP::Init() noexcept{
+    InitializationResult FJastP::Init() noexcept{
         s_Keywords.insert(std::make_pair<HBuffer, uint8_t>(HBuffer("await"),       (uint8_t)Keyword::Await));
         s_Keywords.insert(std::make_pair<HBuffer, uint8_t>(HBuffer("break"),       (uint8_t)Keyword::Break));
         s_Keywords.insert(std::make_pair<HBuffer, uint8_t>(HBuffer("case"),        (uint8_t)Keyword::Case));

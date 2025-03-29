@@ -8,8 +8,7 @@ namespace FJASTP{
         TokenType type = t.GetType();
         switch(type){
         case TokenType::Identifier:{
-            //std::cout << "Current node size is " << (size_t)currentToken.GetValue().GetData() << std::endl;
-            //Node* node = m_NodePool.Allocate((void*)&AtToken(m_At).GetValue(), (void*)nullptr, NodeType::Expression, 0);
+            /// TODO: Check for operators
             *output = Node((void*)&AtToken(m_At).GetValue(), (void*)nullptr, NodeType::Expression, 0);
             m_At++;
             return ASTGeneratorResult();
@@ -87,50 +86,48 @@ namespace FJASTP{
                 uint8_t keyword = currentToken.GetMetadata();
                 switch(keyword){
                     case (uint8_t)Keyword::Class:{
-                        Token identifier = GetToken(++m_At);
-                        if(identifier.GetType() != TokenType::Identifier)return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                        uint32_t identifierAt = ++m_At;
+                        Token identifier = GetToken(identifierAt);
+                        void* derivedFrom = nullptr;
+                        if(identifier.GetType() != TokenType::Identifier)return ASTGeneratorResult(identifierAt, ASTGeneratorError::InvalidClassDefinition);
 
                         Token next = GetToken(++m_At);
                         TokenType type = next.GetType();
                         if(type == TokenType::Keyword){
                             if(next.GetMetadata() == (uint8_t)Keyword::Extends){
-                                //Derived Class
-                                Token extendedClass = GetToken(++m_At);
-                                if(extendedClass.GetType() != TokenType::Identifier)return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
-                                
-                                if(GetToken(++m_At).GetValue() != "{"){
-                                    return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
-                                }
+                                /// Derived Class
+                                uint32_t derivedFromAt = ++m_At;
+                                if(GetToken(derivedFromAt).GetType() != TokenType::Identifier)return ASTGeneratorResult(derivedFromAt, ASTGeneratorError::InvalidClassDefinition);
+                                derivedFrom = static_cast<void*>(&m_Input->at((size_t)derivedFromAt).GetValue());
                                 m_At++;
-
-                                //Get Class body
-                                std::vector<Node*> body;
-                                ASTGeneratorResult result;
-                                while(true){
-                                    result = ParseCurrentToken(body);
-                                    if(!result)break;
-                                }
-
-                                Token t = GetToken(m_At);
-                                if(t.GetValue() != "}"){
-                                    return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
-                                }
-                                m_At++;
-                                void* left = nullptr;
-                                void* right = nullptr;
-                                uint8_t metadata = 0;
-
-                                output.emplace_back(m_NodePool.Allocate(std::move(body), left, right, NodeType::ClassDeclaration, metadata));
-                                //std::cout << "EXP is " << ((HBuffer*)expression.GetLeft())->SubString(0,-1).GetCStr()<<std::endl;
-                                return ASTGeneratorResult();
+                            }else{
+                                return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                             }
-                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
                         }
-
                         if(next.GetValue() != "{")
                             return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
-                        std::cout << "Normal class definition"<<std::endl;
+                        m_At++;
 
+                        std::cout << "Getting body"<<std::endl;
+                        //Get Class body
+                        std::vector<Node*> body;
+                        ASTGeneratorResult result;
+                        while(true){
+                            result = ParseCurrentToken(body);
+                            if(!result)break;
+                        }
+                        std::cout << "done body"<<std::endl;
+
+                        Token t = GetToken(m_At);
+                        if(t.GetValue() != "}"){
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                        }
+                        m_At++;
+                        void* left = &m_Input->at(identifierAt).GetValue();
+                        void* right = nullptr;
+                        uint8_t metadata = 0;
+
+                        output.emplace_back(m_NodePool.Allocate(std::move(body), left, right, NodeType::ClassDeclaration, metadata));
                         return ASTGeneratorResult();
                         break;
                     }

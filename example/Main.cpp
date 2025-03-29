@@ -7,6 +7,7 @@
 #include "FJASTP/Tokenizer.h"
 #include "FJASTP/ASTGenerator.h"
 
+using namespace FJASTP;
 int main(int argc, char** argv){
     std::cout<<"Hello World"<<std::endl;
     HBuffer test1;
@@ -32,15 +33,15 @@ int main(int argc, char** argv){
     }
 
     std::cout << "Starting"<<std::endl;
-    FJASTP::InitializationResult initResult = FJASTP::FJASTP::Init();
-    if(initResult != FJASTP::InitializationResult::Success){
+    InitializationResult initResult = FJastP::Init();
+    if(initResult != InitializationResult::Success){
         std::cout << "Failed to initialize FJASTP"<<std::endl;
         return -1;
     }
 
-    FJASTP::Tokenizer t;
-    std::vector<FJASTP::Token> tokens;
-    FJASTP::TokenizeResult result = t.Tokenize(test1, tokens);
+    Tokenizer t;
+    std::vector<Token> tokens;
+    TokenizeResult result = t.Tokenize(test1, tokens);
 
     if(!result){
         std::cout << "Error Tokenizing Javascript. Error " << (int)result.m_ErrorCode << " at " << result.m_Line << ":" << result.m_Column <<std::endl;
@@ -50,26 +51,35 @@ int main(int argc, char** argv){
     std::cout << "Done Tokenizing"<<std::endl;
     
     for(size_t i = 0; i < tokens.size(); i++){
-        //FJASTP::Token& token = tokens[i];
+        //Token& token = tokens[i];
         //TODO: add pad start functions to HBuffwer
         //std::cout << "Token " << i << " " << token.GetLineNumber() << ":" << token.GetColumnNumber()<< " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;
     }
 
-    FJASTP::ASTGenerator astGenerator;
-    std::vector<FJASTP::Node*> ast; 
+    ASTGenerator astGenerator;
+    std::vector<Node*> ast; 
     ast.reserve(1000);
     std::cout <<"Parsing phase"<<std::endl;
-    FJASTP::ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
+    ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
     std::cout <<"Done Parsing"<<std::endl;
 
     if(!parseResult){
-        FJASTP::Token& errorToken = tokens[parseResult.GetErrorAt()];
+        Token& errorToken = tokens[parseResult.GetErrorAt()];
         printf("Failed to parse AST. Error %d at %d:%d\n", (uint8_t)parseResult.GetErrorCode(), errorToken.GetLineNumber(), errorToken.GetColumnNumber());
         return -1;
     }
     
     for(size_t i = 0; i < ast.size(); i++){
-        FJASTP::Node& node = *ast[i];
+        Node& node = *ast[i];
         printf("AST Program Child node %d is type %d\n", i, (int)node.GetNodeType());
+        switch((uint8_t)node.GetNodeType()){
+            case (uint8_t)NodeType::ClassDeclaration:{
+                std::vector<Node*>& children = node.GetChildren();
+                for(size_t d = 0; d < node.GetChildren().size(); d++){
+                    printf("Child Node %d - Type : %d\n", d, (uint8_t)children[d]->GetNodeType());
+                }
+                break;
+            }
+        }
     }
 }

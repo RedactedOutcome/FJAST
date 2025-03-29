@@ -23,7 +23,7 @@ namespace FJASTP{
         //Automatically handles freeing memory
         void CleanUp()noexcept;
     public:
-        std::vector<Node>& GetChildren() const noexcept{return (std::vector<Node>&)m_Children;}
+        std::vector<Node*>& GetChildren() const noexcept{return (std::vector<Node*>&)m_Children;}
         void* GetLeft() const noexcept{return m_Left;}
         void* GetRight() const noexcept{return m_Right;}
         NodeType GetNodeType() const noexcept{return m_Type;}
