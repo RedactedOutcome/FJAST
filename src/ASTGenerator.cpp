@@ -61,7 +61,9 @@ namespace FJASTP{
                     std::cout << "Method Call"<<std::endl;
                     Node* arguments = m_NodePool.Allocate();
                     ASTGeneratorResult result = ParseExpression(arguments, arguments);
+                    std::cout << "Beofre"<<std::endl;
                     if(!result)return result;
+                    std::cout<<"After"<<std::endl;
                     ///Treating anything inside the parenthesis as arguments
                     ///(5 + 5) isnt a list but is a argument
                     Node* newLeft = m_NodePool.Allocate(std::move(*output));
@@ -135,6 +137,7 @@ namespace FJASTP{
         case TokenType::GroupingSymbol:{
             HBuffer& value = t.GetValue();
 
+            std::cout << "Parsing grouping symbol at " << t.GetValue().SubString(0,-1).GetCStr() << " " << t.GetLineNumber() << ":" << t.GetColumnNumber()<<std::endl;
             if(t.GetValue() == '('){
                 //Parenthesis Expression Or Argument lists
                 m_At++;
@@ -329,15 +332,26 @@ namespace FJASTP{
                         //Parse function body
                         std::vector<Node*> body;
                         ASTGeneratorResult result;
+                        std::cout << "BEFORE ALL "<<std::endl;
                         while(true){
                             result = ParseCurrentToken(body);
                             if(!result)break;
                         }
-                        if(GetToken(m_At).GetValue() != '}')
-                            if(!result)return result;
+
+                        if(GetToken(m_At).GetValue() != '}'){
+                            if(!result){
+                                return result;
+                            }
                             return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidMethodBody);
+                        }
 
                         m_At++;
+                        HBuffer& buffer = GetToken(m_At).GetValue();
+                        std::cout << (void*)buffer.GetData()<< " " << buffer.GetSize()<<std::endl;
+                        std::cout << "CURRENT 2 IS "<< buffer.SubString(0,-1).GetCStr()<<std::endl;
+
+                        std::cout <<"AFTER"<<std::endl;
+                        
                         if(passedType != NodeType::IdentifierExpression && passedType != NodeType::ParameterList)
                             return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidParameterList);
 

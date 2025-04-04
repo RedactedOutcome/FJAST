@@ -73,7 +73,8 @@ int main(int argc, char** argv){
 
     if(!parseResult){
         Token& errorToken = tokens[parseResult.GetErrorAt()];
-        printf("Failed to parse AST. Error %s at %d:%d\n", FJASTP::ASTGeneratorErrorStrings[(uint8_t)parseResult.GetErrorCode()], errorToken.GetLineNumber(), errorToken.GetColumnNumber());
+        int errorCode = (uint8_t)parseResult.GetErrorCode();
+        printf("Failed to parse AST. Error %d, %s at %d:%d\n", errorCode, FJASTP::ASTGeneratorErrorStrings[errorCode], errorToken.GetLineNumber(), errorToken.GetColumnNumber());
         return -1;
     }
     auto t4 = std::chrono::high_resolution_clock::now();
