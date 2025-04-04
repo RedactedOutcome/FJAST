@@ -1,0 +1,17 @@
+bin/
+bin-int/
+.vscode/
+*.exe
+*.sln
+build/
+cmake_install.cmake
+CMakeCache.txt
+*.a
+*.lib
+CMakeFiles/
+*.vcxproj
+*.vcxproj.filters
+cmake_install.cmake
+CMakeCache.txt
+
+build/
