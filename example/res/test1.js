@@ -1,5 +1,5 @@
 
-class HelloTest1 extends cap{
+class HelloTest1{
     print(args1, Update){
         //Bug with (5 + 2) * 2
         jello(hello * 2);
@@ -7,7 +7,12 @@ class HelloTest1 extends cap{
         /// TODO: have support for identifier++ * x
         HelloTest1(test1, 1)
         HelloTest1(test1++ * 2, 1);
-        
+
+        var x = 15;
+
+        class Test{
+            5 * 5 + 2
+        }
         /*
         for(var i = 0; i < 15; i++){
             console.log("Hello World")

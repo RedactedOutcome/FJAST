@@ -29,7 +29,6 @@ namespace FJASTP{
             Token next = GetToken(m_At + 1);
 
             HBuffer nextValue = next.GetValue();
-            std::cout << "CURrent IDENTIFIER" << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
             if(nextValue == '.'){
                 //Is a property access
                 *output = Node(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
@@ -58,12 +57,9 @@ namespace FJASTP{
                 //TODO: check if parse argument list
                 if(next.GetValue() == '('){
                     //Is a method call
-                    std::cout << "Method Call"<<std::endl;
                     Node* arguments = m_NodePool.Allocate();
                     ASTGeneratorResult result = ParseExpression(arguments, arguments);
-                    std::cout << "Beofre"<<std::endl;
                     if(!result)return result;
-                    std::cout<<"After"<<std::endl;
                     ///Treating anything inside the parenthesis as arguments
                     ///(5 + 5) isnt a list but is a argument
                     Node* newLeft = m_NodePool.Allocate(std::move(*output));
@@ -74,7 +70,6 @@ namespace FJASTP{
             }
             else if(nextValue == '('){
                 m_At++;
-                std::cout << "Function Call"<<std::endl;
                 //Function Call or Function Declaration
                 /// TODO: Function Declaration
                 Node* arguments = m_NodePool.Allocate();
@@ -98,12 +93,8 @@ namespace FJASTP{
                 m_At+=2;
                 //return ASTGeneratorResult();
             }else{
-                std::cout << "IdentifierExpression"<<std::endl;
-                std::cout << "before exp is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
-           
                 *output = Node((void*)&m_Input->at(m_At).GetValue(), (void*)nullptr, NodeType::IdentifierExpression, 0);
                 m_At++;
-                std::cout << "after exp is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
             }
 
             /// TODO: Check for operators
@@ -111,10 +102,7 @@ namespace FJASTP{
             TokenType potentialType = potentialOperator.GetType();
 
             bool continueLoop = potentialType == TokenType::ArithmeticOperator;
-            std::cout << "Continue Loop : " << (continueLoop ? "Yes" : "No") << std::endl;
-            
             while(continueLoop){
-                std::cout << "In continue Loop"<<std::endl;
                 m_At++;
 
                 Node* newExpression = m_NodePool.Allocate();
@@ -122,22 +110,18 @@ namespace FJASTP{
                 ASTGeneratorResult result = ParseExpression(newExpression, newExpression, metadata != (uint8_t)ArithmeticOperations::Multiplication && metadata != (uint8_t)ArithmeticOperations::Division);
                 potentialOperator = GetToken(m_At);
                 potentialType = potentialOperator.GetType();
-                std::cout << "RESULT IS " << (result ? "GOOD" : "BASD")<<std::endl;
                 if(!result)return result;
 
                 *output = std::move(Node(m_NodePool.Allocate(std::move(*output)), newExpression, NodeType::ArithmeticExpression, metadata));
                 
                 continueLoop = potentialType == TokenType::ArithmeticOperator;
             };
-            std::cout << "after all is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
-            
 
             return ASTGeneratorResult();
         }
         case TokenType::GroupingSymbol:{
             HBuffer& value = t.GetValue();
 
-            std::cout << "Parsing grouping symbol at " << t.GetValue().SubString(0,-1).GetCStr() << " " << t.GetLineNumber() << ":" << t.GetColumnNumber()<<std::endl;
             if(t.GetValue() == '('){
                 //Parenthesis Expression Or Argument lists
                 m_At++;
@@ -163,7 +147,6 @@ namespace FJASTP{
                 while(continueLoop){
                     m_At++;
 
-                    std::cout << "TEsting " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
                     if(potentialOperator.GetValue() == ','){
                         if(!isList){
                             /// @brief Convert output node to a list treating the current output as the first argument
@@ -177,10 +160,7 @@ namespace FJASTP{
                     Node* newExpression = m_NodePool.Allocate();
                     uint8_t metadata = potentialOperator.GetMetadata();
                     bool allowedArithmeticOperations = metadata != (uint8_t)ArithmeticOperations::Multiplication && metadata != (uint8_t)ArithmeticOperations::Division;
-                    std::cout << (allowedArithmeticOperations ? "Allowed arithmetic" : "Not allowed")<<std::endl;
-                    std::cout << "Before is " <<GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
                     result = ParseExpression(newExpression, newExpression, allowedArithmeticOperations);
-                    std::cout << "After at is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
                     potentialOperator = GetToken(m_At);
                     potentialType = potentialOperator.GetType();
                     
@@ -198,7 +178,6 @@ namespace FJASTP{
                 };
                 if(potentialOperator.GetValue() != ')'){
                     //Invalid End of list or expression
-                    std::cout << "Invalid data : " << potentialOperator.GetValue().SubString(0,-1).GetCStr()<<std::endl;
                     return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidExpressionGrouping);
                 }
                 m_At++;
@@ -232,7 +211,6 @@ namespace FJASTP{
 
                     do{
                         m_At++;
-                        std::cout << "Doing test1"<<std::endl;
                         Node* newExpression = m_NodePool.Allocate(nullptr, nullptr, NodeType::ArithmeticExpression, 0);
                         uint8_t potentialMetadata = potentialOperator.GetMetadata();
                         bool isDivisionOrMultiplication = potentialMetadata == (uint8_t)ArithmeticOperations::Multiplication || potentialMetadata == (uint8_t)ArithmeticOperations::Division;
@@ -332,7 +310,6 @@ namespace FJASTP{
                         //Parse function body
                         std::vector<Node*> body;
                         ASTGeneratorResult result;
-                        std::cout << "BEFORE ALL "<<std::endl;
                         while(true){
                             result = ParseCurrentToken(body);
                             if(!result)break;
@@ -346,12 +323,6 @@ namespace FJASTP{
                         }
 
                         m_At++;
-                        HBuffer& buffer = GetToken(m_At).GetValue();
-                        std::cout << (void*)buffer.GetData()<< " " << buffer.GetSize()<<std::endl;
-                        std::cout << "CURRENT 2 IS "<< buffer.SubString(0,-1).GetCStr()<<std::endl;
-
-                        std::cout <<"AFTER"<<std::endl;
-                        
                         if(passedType != NodeType::IdentifierExpression && passedType != NodeType::ParameterList)
                             return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidParameterList);
 
@@ -437,6 +408,24 @@ namespace FJASTP{
                         output.emplace_back(m_NodePool.Allocate(std::move(body), left, right, NodeType::ClassDeclaration, metadata));
                         return ASTGeneratorResult();
                         break;
+                    }
+                    case (uint8_t)Keyword::Var:{
+                        Token nextToken = GetToken(m_At + 1);
+                        TokenType nextTokenType = nextToken.GetType();
+
+                        if(nextTokenType == TokenType::Identifier){
+                            m_At++;
+
+                            Node* variableIdentifier = m_NodePool.Allocate(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
+                            *output = Node(static_cast<void*>(variableIdentifier), static_cast<void*>(variableIdentifier), NodeType::VariableDeclaration, (uint8_t)VariableDeclarationType::Var);
+                        }
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
+                    }
+                    case (uint8_t)Keyword::Let:{
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
+                    }
+                    case (uint8_t)Keyword::Const:{
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
                     }
                     default:{
                         return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);

@@ -31,6 +31,7 @@ namespace FJASTP{
             char c = input.At(m_At);
             
             switch(c){
+                case '\t':
                 case ' ':{
                     m_At++;
                     continue;
@@ -415,14 +416,14 @@ namespace FJASTP{
                         char afterNext = m_CurrentInput.Get(++m_At);
                         if(afterNext == '='){
                             m_At++;
-                            PushBack(TokenType::AssignmentOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn());
+                            PushBack(TokenType::ConditionalOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn());
                             continue;
                         }
-                        PushBack(TokenType::AssignmentOperator, HBuffer("==", 2, false, false), m_Line, GetCurrentColumn());
+                        PushBack(TokenType::ConditionalOperator, HBuffer("==", 2, false, false), m_Line, GetCurrentColumn());
                     }
                     else if (nextChar == '>'){
                         m_At++;
-                        PushBack(TokenType::AssignmentOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn());
+                        PushBack(TokenType::ConditionalOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn());
                         continue;
                     }
                     else{
@@ -489,7 +490,7 @@ namespace FJASTP{
         while(true){
             if(m_At >= m_InputSize)break;
             char c = m_CurrentInput.At(m_At);
-
+            
             //TODO: maybe run through a lookup
             if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$'){
                 m_At++;

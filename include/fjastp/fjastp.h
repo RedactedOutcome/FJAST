@@ -41,6 +41,7 @@ namespace FJASTP{
         UnaryExpression,
         Literal,
         ClassDeclaration,
+        VariableDeclaration,
         FunctionDeclaration,
         MethodDeclaration,
         MemeberDeclaration,
@@ -82,6 +83,12 @@ namespace FJASTP{
     };
     extern const char* ASTGeneratorErrorStrings[16];
 
+    enum class VariableDeclarationType : uint8_t{
+        Var=0,
+        Let=1,
+        Const=2
+    };
+    
     enum class NumericalLiteralBaseMetadataFormat : uint8_t{
         Base10=0,
         Binary=1,
