@@ -59,25 +59,26 @@ int main(int argc, char** argv){
     for(size_t i = 0; i < tokens.size(); i++){
         Token& token = tokens[i];
         //TODO: add pad start functions to HBuffwer
-        std::cout << "Token " << i << " " << token.GetLineNumber() << ":" << token.GetColumnNumber()<< " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;
+        //std::cout << "Token " << i << " " << token.GetLineNumber() << ":" << token.GetColumnNumber()<< " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;
     }
 
     ASTGenerator astGenerator;
     std::vector<Node*> ast; 
     ast.reserve(1000);
     
+    std::cout <<"Parsing phase"<<std::endl;
     auto t3 = std::chrono::high_resolution_clock::now();
 
-    std::cout <<"Parsing phase"<<std::endl;
     ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
-    std::cout <<"Done Parsing"<<std::endl;
 
     if(!parseResult){
         Token& errorToken = tokens[parseResult.GetErrorAt()];
-        printf("Failed to parse AST. Error %d at %d:%d\n", (uint8_t)parseResult.GetErrorCode(), errorToken.GetLineNumber(), errorToken.GetColumnNumber());
+        printf("Failed to parse AST. Error %s at %d:%d\n", FJASTP::ASTGeneratorErrorStrings[(uint8_t)parseResult.GetErrorCode()], errorToken.GetLineNumber(), errorToken.GetColumnNumber());
         return -1;
     }
     auto t4 = std::chrono::high_resolution_clock::now();
+    std::cout <<"Done Parsing"<<std::endl;
+    
     duration = t4 - t3;
     std::cout << "AST Generation time: " << duration.count() << " seconds\n";
 

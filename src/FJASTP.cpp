@@ -42,4 +42,23 @@ namespace FJASTP{
         s_Keywords.insert(std::make_pair<HBuffer, uint8_t>(HBuffer("yield"),       (uint8_t)Keyword::Yield));
         return InitializationResult::Success;
     }
+    
+    const char* FJASTP::ASTGeneratorErrorStrings[16] = {
+        "Success",
+        "End Of File",
+        "InvalidClass Definition",
+        "Invalid Expression",
+        "Invalid NegationExpression",
+        "Invalid UnaryExpression",
+        "Expected ExpressionOrStatement",
+        "Invalid Method Declaration",
+        "Invalid Method Body",
+        "Invalid Function Declaration",
+        "Invalid Function Body",
+        "Invalid Function Call",
+        "Invalid Expression Grouping",
+        "Unsupported Syntax",
+        "Invalid Paramter List",
+        "Invalid Propery Access Expression"
+    };
 }

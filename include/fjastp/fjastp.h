@@ -80,7 +80,8 @@ namespace FJASTP{
         InvalidParameterList            =14,
         InvalidPropertyAccessExpression =15
     };
-    
+    extern const char* ASTGeneratorErrorStrings[16];
+
     enum class NumericalLiteralBaseMetadataFormat : uint8_t{
         Base10=0,
         Binary=1,
