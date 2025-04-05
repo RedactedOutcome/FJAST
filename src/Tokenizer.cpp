@@ -24,7 +24,7 @@ namespace FJASTP{
         
         m_InputSize = static_cast<uint32_t>(input.GetSize());
         /// @brief getting the amount of extra tokens to allocate whenever we reallocate our list
-        m_ExtraReallocate = static_cast<uint32_t>(std::max(static_cast<uint32_t>(150), static_cast<uint32_t>(m_InputSize / 200)));
+        //m_ExtraReallocate = static_cast<uint32_t>(std::max(static_cast<uint32_t>(150), static_cast<uint32_t>(m_InputSize / 200)));
 
         while(true){
             if(m_At >= m_InputSize)return TokenizeResult();
@@ -557,18 +557,4 @@ namespace FJASTP{
         }
     }
     
-    void Tokenizer::PushBack(const Token& token)noexcept{
-        if(m_CurrentOutput->size() == m_CurrentOutput->capacity()){
-            m_CurrentOutput->reserve(m_CurrentOutput->size() + m_ExtraReallocate);
-        }
-
-        m_CurrentOutput->emplace_back(token);
-    }
-    void Tokenizer::PushBack(Token&& token)noexcept{
-        if(m_CurrentOutput->size() == m_CurrentOutput->capacity()){
-            m_CurrentOutput->reserve(m_CurrentOutput->size() + m_ExtraReallocate);
-        }
-
-        m_CurrentOutput->emplace_back(std::move(token));
-    }
 }
