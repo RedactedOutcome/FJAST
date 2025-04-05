@@ -439,15 +439,15 @@ namespace FJASTP{
                             Node* variableIdentifier = m_NodePool.Allocate(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
                             Node* currentOutput = m_NodePool.Allocate(static_cast<void*>(variableIdentifier), static_cast<void*>(nullptr), NodeType::VariableDeclaration, (uint8_t)VariableDeclarationType::Var);
                             
-                            Token currentToken = GetToken(++m_At);
-                            TokenType currentType = nextToken.GetType();
+                            nextToken = GetToken(++m_At);
+                            nextTokenType = nextToken.GetType();
 
                             HBuffer& nextTokenValue = nextToken.GetValue();
                             void* right = nullptr;
 
-                            if(currentType == TokenType::AssignmentOperator){
+                            if(nextTokenType == TokenType::AssignmentOperator){
                                 //Check for valid Assignment operator with variable declaration
-                                uint8_t assignmentOperator = currentToken.GetMetadata();
+                                uint8_t assignmentOperator = nextToken.GetMetadata();
                                 if(assignmentOperator != (uint8_t)AssignmentOperator::Assignment){
                                     /// TODO: add error messages
                                     return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidVariableAssignment);
@@ -460,10 +460,10 @@ namespace FJASTP{
 
                                 Node* newLeft = m_NodePool.Allocate(std::move(*currentOutput));
                                 *currentOutput = Node(static_cast<void*>(newLeft), static_cast<void*>(expression), NodeType::VariableAssignment, assignmentOperator);
-                                currentToken = GetToken(m_At);
+                                nextToken = GetToken(m_At);
                             }
 
-                            if(currentToken.GetValue() == ';'){
+                            if(nextToken.GetValue() == ';'){
                                 m_At++;
                             }
                             
