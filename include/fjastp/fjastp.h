@@ -45,6 +45,7 @@ namespace FJASTP{
         FunctionDeclaration,
         MethodDeclaration,
         MemeberDeclaration,
+        VariableAssignment,
         PropertyAccessExpression,
         FunctionCall,
         MethodCall,
@@ -79,7 +80,8 @@ namespace FJASTP{
         InvalidExpressionGrouping       =12,
         UnsupportedSyntax               =13,
         InvalidParameterList            =14,
-        InvalidPropertyAccessExpression =15
+        InvalidPropertyAccessExpression =15,
+        InvalidVariableAssignment
     };
     extern const char* ASTGeneratorErrorStrings[16];
 
@@ -88,7 +90,7 @@ namespace FJASTP{
         Let=1,
         Const=2
     };
-    
+
     enum class NumericalLiteralBaseMetadataFormat : uint8_t{
         Base10=0,
         Binary=1,
@@ -142,6 +144,16 @@ namespace FJASTP{
         Exponentiation,
         Increment,
         Decrement
+    };
+
+    enum class AssignmentOperator : uint8_t{
+        Assignment=0, // x = value
+        MultiplicationAssignment, // x *= value
+        DivisionAssignment, // x /= value
+        ExponentiationAssignment, // x **= value
+        AdditionAssignment, // x += value
+        SubtractionAssignment, // x -= value
+        ModulosAssignment // x %= value
     };
 
     class FJastP{

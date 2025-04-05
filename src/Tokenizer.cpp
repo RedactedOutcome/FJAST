@@ -128,14 +128,20 @@ namespace FJASTP{
                     char next = m_CurrentInput.Get(m_At + 1);
 
                     if(next == '*'){
-                        //Exponentiation Operator
+                        //Exponentiation
+                        if(m_CurrentInput.Get(m_At + 2) == '='){
+                            //Assignment
+                            PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 3), (uint8_t)AssignmentOperator::ExponentiationAssignment, m_Line, GetCurrentColumn());
+                            m_At+=3;
+                            break;
+                        }
                         PushBack(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 2), (uint8_t)ArithmeticOperations::Exponentiation, m_Line, GetCurrentColumn());
                         m_At+=2;
                         break;
                     }
                     else if(next == '='){
                         //Multiplication Assignment
-                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), (uint8_t)ArithmeticOperations::Multiplication, m_Line, GetCurrentColumn());
+                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), (uint8_t)AssignmentOperator::MultiplicationAssignment, m_Line, GetCurrentColumn());
                         m_At+=2;
                         break;
                     }
@@ -156,13 +162,18 @@ namespace FJASTP{
                     }
                     if(c == '='){
                         //Unary Operator
-                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
+                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), (uint8_t)AssignmentOperator::AdditionAssignment, m_Line, GetCurrentColumn());
                         m_At+=2;
                         break;
                     }
                     //Arithmetic Operator
                     PushBack(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), (uint8_t)ArithmeticOperations::Addition, m_Line, GetCurrentColumn());
                     m_At++;
+                    break;
+                }
+                case '%':{
+                    //Some form of modulos operator
+
                     break;
                 }
                 case '\'':
@@ -241,8 +252,13 @@ namespace FJASTP{
                 case '-':{
                     //Handle negation and urinary operators
                     char c = m_CurrentInput.Get(m_At + 1);
-                    if(c == '-' || c == '='){
-                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
+                    if(c == '-'){
+                        PushBack(TokenType::UnaryOperator, m_CurrentInput.SubBuffer(m_At, 2), m_Line, GetCurrentColumn());
+                        m_At+=2;
+                        break;
+                    }
+                    if(c == '='){
+                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), (uint8_t)AssignmentOperator::SubtractionAssignment, m_Line, GetCurrentColumn());
                         m_At+=2;
                         break;
                     }
@@ -490,7 +506,7 @@ namespace FJASTP{
         while(true){
             if(m_At >= m_InputSize)break;
             char c = m_CurrentInput.At(m_At);
-            
+
             //TODO: maybe run through a lookup
             if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_' || c == '$'){
                 m_At++;
