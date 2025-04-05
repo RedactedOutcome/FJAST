@@ -146,6 +146,34 @@ namespace FJASTP{
                 std::cout << std::string(padStart, ' ') << "Numerical Literal : " << static_cast<HBuffer*>(m_Left)->SubString(0,-1).GetCStr() << std::endl;
                 break;
             }
+            case (uint8_t)NodeType::AssignmentExpression:{
+                const char* type = "";
+                switch(m_Metadata){
+                    case (uint8_t)AssignmentOperator::Assignment:
+                        type = "=";
+                        break;
+                    case (uint8_t)AssignmentOperator::MultiplicationAssignment:
+                        type = "*=";
+                        break;
+                    case (uint8_t)AssignmentOperator::DivisionAssignment:
+                        type = "/=";
+                        break;
+                    case (uint8_t)AssignmentOperator::ModulosAssignment:
+                        type = "%=";
+                        break;
+                    case (uint8_t)AssignmentOperator::AdditionAssignment:
+                        type = "+=";
+                        break;
+                    case (uint8_t)AssignmentOperator::SubtractionAssignment:
+                        type = "-=";
+                        break;
+                }
+                std::cout << std::string(padStart, ' ') << "Assignment Expression : " << type << std::endl;
+                std::cout << std::string(padStart, ' ') << "Left Expression : " << std::endl;
+                static_cast<Node*>(m_Left)->Print(padStart + 2);
+                std::cout << std::string(padStart, ' ') << "Right Expression : " << std::endl;
+                static_cast<Node*>(m_Right)->Print(padStart + 2);
+            }
         default:
             std::cout << std::string(padStart, ' ') << "Dont know how to print node : " << (int)m_Type << std::endl;
         }

@@ -43,14 +43,14 @@ namespace FJASTP{
         return InitializationResult::Success;
     }
     
-    const char* FJASTP::ASTGeneratorErrorStrings[16] = {
+    const char* FJASTP::ASTGeneratorErrorStrings[17] = {
         "Success",
         "End Of File",
-        "InvalidClass Definition",
+        "Invalid Class Definition",
         "Invalid Expression",
         "Invalid NegationExpression",
         "Invalid UnaryExpression",
-        "Expected ExpressionOrStatement",
+        "Expected Expression Or Statement",
         "Invalid Method Declaration",
         "Invalid Method Body",
         "Invalid Function Declaration",
@@ -59,6 +59,7 @@ namespace FJASTP{
         "Invalid Expression Grouping",
         "Unsupported Syntax",
         "Invalid Paramter List",
-        "Invalid Propery Access Expression"
+        "Invalid Propery Access Expression",
+        "Invalid Variable Assignment"
     };
 }

@@ -28,7 +28,7 @@ namespace FJASTP{
     public:
         /// @brief Generates an abstract syntax tree from a list of tokens.
         /// @return Returns type of ASTGeneratorResult.
-        ASTGeneratorResult Generate(std::vector<Token>& input, std::vector<Node*>& output) noexcept;
+        ASTGeneratorResult Generate(std::vector<Token>& input, std::vector<Node*>& outputNodes) noexcept;
 
         Token GetToken(size_t at) const noexcept{if(at < 0 || at >= m_TokenCount)return Token(); return m_Input->at(at);}
         Token& AtToken(size_t at) const noexcept{return (Token&)m_Input[at];}

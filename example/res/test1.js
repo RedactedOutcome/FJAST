@@ -9,10 +9,7 @@ class HelloTest1{
         HelloTest1(test1++ * 2, 1);
 
         var x = 15;
-
-        class Test{
-            5 * 5 + 2
-        }
+        x *= 15;
         /*
         for(var i = 0; i < 15; i++){
             console.log("Hello World")

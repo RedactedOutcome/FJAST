@@ -51,7 +51,8 @@ namespace FJASTP{
         MethodCall,
         ParameterList,
         ArgumentList,
-        Negation
+        Negation,
+        AssignmentExpression
     };
 
     enum class TokenizerError : uint8_t{
@@ -81,9 +82,9 @@ namespace FJASTP{
         UnsupportedSyntax               =13,
         InvalidParameterList            =14,
         InvalidPropertyAccessExpression =15,
-        InvalidVariableAssignment
+        InvalidVariableAssignment = 16
     };
-    extern const char* ASTGeneratorErrorStrings[16];
+    extern const char* ASTGeneratorErrorStrings[17];
 
     enum class VariableDeclarationType : uint8_t{
         Var=0,

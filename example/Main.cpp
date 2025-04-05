@@ -86,7 +86,7 @@ int main(int argc, char** argv){
     for(size_t i = 0; i < ast.size(); i++){
         Node& node = *ast[i];
         //printf("AST Program Child node %d is type %d\n", i, (int)node.GetNodeType());
-        //node.Print(0);
+        node.Print(0);
     }
 
 }
