@@ -8,7 +8,9 @@ class HelloTest1{
         HelloTest1(test1, 1)
         HelloTest1(test1++ * 2, 1);
 
-        var x = 15;
+        var var1 = 15;
+        let var2 = 15;
+        const constVariaable = 15;
         x *= 15;
         /*
         for(var i = 0; i < 15; i++){

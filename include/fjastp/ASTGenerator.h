@@ -42,7 +42,12 @@ namespace FJASTP{
         /// @param replaceNode a node to keep track of the first expression output to replace its data so we can easily differentiate between nodes like property access and function call with property access expressions and nest expressions.
         /// @param allowArithmeticOperations used to easily do operator precedence
         ASTGeneratorResult ParseExpression(Node* output, Node* replaceNode, bool allowArithmeticOperations = true)noexcept;
-        
+
+
+        /// @brief Parses a variable declaration. May also parse an assignment expression along with the declaration
+        /// @param type 
+        /// @return 
+        ASTGeneratorResult ParseVariableDeclaration(VariableDeclarationType type, Node* currentOutput) noexcept;
         ASTGeneratorResult ParseType(Node* output)noexcept;
 
         ASTGeneratorResult ParseCurrentToken(std::vector<Node*>& output)noexcept;

@@ -19,6 +19,7 @@ namespace FJASTP{
         SegmentedPool()noexcept{
             m_Pool.reserve(5);
             m_Pool.push_back(new std::array<T, PoolSize>());
+            memset(&m_Pool[0]->at(0), 0, sizeof(T) * sizeof(PoolSize));
         }
         ~SegmentedPool()noexcept{
             for(size_t i = 0; i < m_Pool.size(); i++){
@@ -30,6 +31,7 @@ namespace FJASTP{
             if(m_PoolIndex >= PoolSize){
                 m_PoolIndex = 0;
                 m_Pool.push_back(new std::array<T, PoolSize>());
+                memset(&m_Pool[0]->at(0), 0, sizeof(T) * sizeof(PoolSize));
             }
             return &(m_Pool[m_Pool.size() - 1]->at(m_PoolIndex++));
         }
@@ -38,6 +40,7 @@ namespace FJASTP{
             if(m_PoolIndex >= PoolSize){
                 m_PoolIndex = 0;
                 m_Pool.push_back(new std::array<T, PoolSize>());
+                memset(&m_Pool[0]->at(0), 0, sizeof(T) * sizeof(PoolSize));
             }
             T* t = &(m_Pool[m_Pool.size() - 1]->at(m_PoolIndex++));
             *t = std::move(T(std::forward<Args>(args)...));

@@ -2,6 +2,42 @@
 #include "ASTGenerator.h"
 
 namespace FJASTP{
+    ASTGeneratorResult ASTGenerator::ParseVariableDeclaration(VariableDeclarationType type, Node* currentOutput) noexcept{
+        m_At++;
+
+        Node identifier(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
+        *currentOutput = Node(static_cast<void*>(m_NodePool.Allocate(std::move(identifier))), static_cast<void*>(nullptr), NodeType::VariableDeclaration, static_cast<uint8_t>(type));
+
+        Token currentToken = GetToken(++m_At);
+        TokenType nextTokenType = currentToken.GetType();
+
+        HBuffer& nextTokenValue = currentToken.GetValue();
+        void* right = nullptr;
+
+        if(nextTokenType == TokenType::AssignmentOperator){
+            //Check for valid Assignment operator with variable declaration
+            uint8_t assignmentOperator = currentToken.GetMetadata();
+            if(assignmentOperator != (uint8_t)AssignmentOperator::Assignment){
+                /// TODO: add error messages
+                return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidVariableAssignment);
+            }
+
+            m_At++;
+            Node* expression = m_NodePool.Allocate();
+            ASTGeneratorResult result = ParseExpression(expression, expression);
+            if(!result)return result;
+
+            Node* newLeft = m_NodePool.Allocate(std::move(*currentOutput));
+            *currentOutput = Node(static_cast<void*>(newLeft), static_cast<void*>(expression), NodeType::VariableAssignment, static_cast<uint8_t>(type));
+            currentToken = GetToken(m_At);
+        }
+
+        if(currentToken.GetValue() == ';'){
+            m_At++;
+        }
+
+        return ASTGeneratorResult();
+    }
     ASTGeneratorResult ASTGenerator::ParseExpression(Node* output, Node* replaceNode, bool allowArithmeticOperations)noexcept{
         Token t = GetToken(m_At);
         TokenType currentTokenType = t.GetType();
@@ -28,9 +64,6 @@ namespace FJASTP{
             uint32_t startIdentifier = m_At;
             Token nextToken = GetToken(m_At + 1);
             TokenType nextTokenType = nextToken.GetType();
-
-            std::cout << "CURENT is " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
-            std::cout << "next is " << nextToken.GetValue().SubString(0,-1).GetCStr()<<std::endl;
 
             HBuffer nextValue = nextToken.GetValue();
             if(nextValue == '.'){
@@ -85,17 +118,14 @@ namespace FJASTP{
                 //return ASTGeneratorResult();
             }
             else if(nextTokenType == TokenType::AssignmentOperator){
-                std::cout << "s IS " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
-
                 //Handles x (assignment operator) value
                 Node* left = m_NodePool.Allocate(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
                 m_At+=2;
                 Node* value = m_NodePool.Allocate();
-                std::cout << "CURRENT IS " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
                 ASTGeneratorResult result = ParseExpression(value, value);
                 if(!result)return result;
                 *output = Node(static_cast<void*>(left), static_cast<void*>(value), NodeType::AssignmentExpression, nextToken.GetMetadata());
-                
+                if(GetToken(m_At).GetValue() == ';')m_At++;
             }
             else if(nextValue == "++"){
                 //Unary Increment operator
@@ -434,48 +464,41 @@ namespace FJASTP{
                         TokenType nextTokenType = nextToken.GetType();
                         
                         if(nextTokenType == TokenType::Identifier){
-                            m_At++;
-
-                            Node* variableIdentifier = m_NodePool.Allocate(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
-                            Node* currentOutput = m_NodePool.Allocate(static_cast<void*>(variableIdentifier), static_cast<void*>(nullptr), NodeType::VariableDeclaration, (uint8_t)VariableDeclarationType::Var);
-                            
-                            currentToken = GetToken(++m_At);
-                            nextTokenType = currentToken.GetType();
-
-                            HBuffer& nextTokenValue = currentToken.GetValue();
-                            void* right = nullptr;
-
-                            if(nextTokenType == TokenType::AssignmentOperator){
-                                //Check for valid Assignment operator with variable declaration
-                                uint8_t assignmentOperator = currentToken.GetMetadata();
-                                if(assignmentOperator != (uint8_t)AssignmentOperator::Assignment){
-                                    /// TODO: add error messages
-                                    return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidVariableAssignment);
-                                }
-
-                                m_At++;
-                                Node* expression = m_NodePool.Allocate();
-                                ASTGeneratorResult result = ParseExpression(expression, expression);
-                                if(!result)return result;
-
-                                Node* newLeft = m_NodePool.Allocate(std::move(*currentOutput));
-                                *currentOutput = Node(static_cast<void*>(newLeft), static_cast<void*>(expression), NodeType::VariableAssignment, assignmentOperator);
-                                currentToken = GetToken(m_At);
-                            }
-
-                            if(currentToken.GetValue() == ';'){
-                                m_At++;
-                            }
-                            
-                            outputNodes.emplace_back(currentOutput);
+                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
+                            Node* expression = m_NodePool.Allocate();
+                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Var, expression);
+                            if(!result)return result;
+                            outputNodes.emplace_back(expression);
                             return ASTGeneratorResult();
                         }
                         return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
                     }
                     case (uint8_t)Keyword::Let:{
+                        Token nextToken = GetToken(m_At + 1);
+                        TokenType nextTokenType = nextToken.GetType();
+                        
+                        if(nextTokenType == TokenType::Identifier){
+                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
+                            Node* expression = m_NodePool.Allocate();
+                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Let, expression);
+                            if(!result)return result;
+                            outputNodes.emplace_back(expression);
+                            return ASTGeneratorResult();
+                        }
                         return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
                     }
                     case (uint8_t)Keyword::Const:{
+                        Token nextToken = GetToken(m_At + 1);
+                        TokenType nextTokenType = nextToken.GetType();
+                        
+                        if(nextTokenType == TokenType::Identifier){
+                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
+                            Node* expression = m_NodePool.Allocate();
+                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Const, expression);
+                            if(!result)return result;
+                            outputNodes.emplace_back(expression);
+                            return ASTGeneratorResult();
+                        }
                         return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
                     }
                     default:{
