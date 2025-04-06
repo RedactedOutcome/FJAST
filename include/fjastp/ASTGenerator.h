@@ -26,7 +26,7 @@ namespace FJASTP{
     /// @brief Does a Syntactic Analysis and generates ast. Only does slight semantic analysis
     class ASTGenerator{
     public:
-        /// @brief Generates an abstract syntax tree from a list of tokens.
+        /// @brief Generates an abstract syntax tree from a list of tokens. May not have Comment tokens inside vector
         /// @return Returns type of ASTGeneratorResult.
         ASTGeneratorResult Generate(std::vector<Token>& input, std::vector<Node*>& outputNodes) noexcept;
 

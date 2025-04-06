@@ -10,7 +10,7 @@ namespace FJASTP{
     enum class InitializationResult : uint8_t{
         Success=0
     };
-
+    
     enum class TokenType : uint8_t{
         EndOfFile=0,
         Identifier,
@@ -29,7 +29,9 @@ namespace FJASTP{
         Punctuator,
         GroupingSymbol,
         RegExpLiteral,
-        TemplateLiteral
+        TemplateLiteral,
+        //For reconstructing old code
+        Comment
     };
 
     enum class NodeType : uint8_t{

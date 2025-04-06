@@ -18,7 +18,7 @@ namespace FJASTP{
     3 - scientific
     
     */
-    TokenizeResult Tokenizer::Tokenize(const HBuffer& input, std::vector<Token>& output) noexcept{
+    TokenizeResult Tokenizer::Tokenize(const HBuffer& input, std::vector<Token>& output, bool allowComments) noexcept{
         m_CurrentInput = input;
         m_CurrentOutput = &output;
         
@@ -56,16 +56,19 @@ namespace FJASTP{
                     char nextChar = m_CurrentInput.Get(m_At + 1);
                     if(nextChar == '/'){
                         m_At+=2;
+                        size_t commentAt = m_At;
 
                         while(true){
                             if(m_At >= m_InputSize){
                                 //Last line
+                                if(allowComments)PushBack(TokenType::Comment, m_CurrentInput.SubBuffer(commentAt, m_At - commentAt), m_Line, GetCurrentColumn());
                                 return TokenizeResult();
                             }
                             char c = m_CurrentInput.At(m_At++);
                             if(c == '\n'){
                                 m_Line++;
                                 m_CurrentLineStart = m_At;
+                                if(allowComments)PushBack(TokenType::Comment, m_CurrentInput.SubBuffer(commentAt, (m_At - commentAt) - 1), m_Line, GetCurrentColumn());
                                 break;
                             }
                             if(c == '\12'){
@@ -74,8 +77,11 @@ namespace FJASTP{
                                     m_At++;
                                     m_Line++;
                                     m_CurrentLineStart = m_At;
+                                    ///Havent tested this yet
+                                    if(allowComments)PushBack(TokenType::Comment, m_CurrentInput.SubBuffer(commentAt, (m_At - commentAt) - 2), m_Line, GetCurrentColumn());
                                     break;
                                 }
+                                if(allowComments)PushBack(TokenType::Comment, m_CurrentInput.SubBuffer(commentAt, (m_At - commentAt) - 2), m_Line, GetCurrentColumn());
 
                                 m_Line++;
                                 m_CurrentLineStart = m_At;

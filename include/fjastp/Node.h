@@ -38,7 +38,7 @@ namespace FJASTP{
         Node& operator=(const Node& node) = delete;
         Node& operator=(Node&&) noexcept;
     private:
-        /// TODO: have custom allocator for nodes. Allocate like 50 nodes each reallocation to speed up and not reallocate as often
+        /// TODO: have custom allocator for nodes. Reserve extra nodes using exponential growth
         std::vector<Node*> m_Children;
         void* m_Left = nullptr;
         void* m_Right = nullptr;

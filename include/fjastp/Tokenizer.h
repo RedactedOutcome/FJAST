@@ -34,7 +34,7 @@ namespace FJASTP{
         /// @brief Parses the input file as javascript and appends tokens to output. Doesnt allocate new data just points to offset of the input buffer
         /// @param input the hbuffer that contains the buffer that the ouput datas buffers point to
         /// @return returns a empty TokenizeResult state with a success value if tokizing was successfull, else returns the line, column, and status code
-        [[nodiscard]] TokenizeResult Tokenize(const HBuffer& input, std::vector<Token>& output) noexcept;
+        [[nodiscard]] TokenizeResult Tokenize(const HBuffer& input, std::vector<Token>& output, bool allowComments = false) noexcept;
     private:
         /// @brief Validates a utf8 character at m_At and jumps past it if valid.
         /// @return returns success if is valid utf8 javascript identifier character.
