@@ -442,23 +442,25 @@ namespace FJASTP{
                     break;
                 }
                 case '=':{
-                    char nextChar = m_CurrentInput.Get(++m_At);
+                    char nextChar = m_CurrentInput.Get(m_At + 1);
                     if(nextChar == '='){
-                        char afterNext = m_CurrentInput.Get(++m_At);
+                        char afterNext = m_CurrentInput.Get(m_At + 2);
                         if(afterNext == '='){
-                            m_At++;
+                            m_At += 3;
                             PushBack(TokenType::ConditionalOperator, HBuffer("===", 3, false, false), m_Line, GetCurrentColumn());
                             continue;
                         }
+                        m_At += 2;
                         PushBack(TokenType::ConditionalOperator, HBuffer("==", 2, false, false), m_Line, GetCurrentColumn());
                     }
                     else if (nextChar == '>'){
-                        m_At++;
-                        PushBack(TokenType::ConditionalOperator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn());
+                        PushBack(TokenType::Punctuator, HBuffer("=>", 2, false, false), m_Line, GetCurrentColumn());
+                        m_At+=2;
                         continue;
                     }
                     else{
                         PushBack(TokenType::AssignmentOperator, HBuffer("=", 1, false, false), m_Line, GetCurrentColumn());
+                        m_At++;
                     }
                     break;
                 }

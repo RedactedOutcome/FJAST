@@ -52,13 +52,70 @@ namespace FJASTP{
         return ASTGeneratorResult();
     }
     ASTGeneratorResult ASTGenerator::ParseExpression(Node* output, Node* replaceNode, bool allowArithmeticOperations)noexcept{
-        Token t = GetToken(m_At);
-        TokenType currentTokenType = t.GetType();
+        Token currentToken = GetToken(m_At);
+        TokenType currentTokenType = currentToken.GetType();
         switch(currentTokenType){
         case TokenType::EndOfFile:
             return ASTGeneratorResult(ASTGeneratorError::EndOfFile);
+            case TokenType::Keyword:{
+                uint8_t keyword = currentToken.GetMetadata();
+                switch(keyword){
+                    case (uint8_t)Keyword::Class:{
+                        uint32_t identifierAt = ++m_At;
+                        Token identifier = GetToken(identifierAt);
+                        void* derivedFrom = nullptr;
+                        if(identifier.GetType() != TokenType::Identifier)return ASTGeneratorResult(identifierAt, ASTGeneratorError::InvalidClassDefinition);
+
+                        Token next = GetToken(++m_At);
+                        TokenType type = next.GetType();
+                        if(type == TokenType::Keyword){
+                            if(next.GetMetadata() == (uint8_t)Keyword::Extends){
+                                /// Derived Class
+                                uint32_t derivedFromAt = ++m_At;
+                                if(GetToken(derivedFromAt).GetType() != TokenType::Identifier)return ASTGeneratorResult(derivedFromAt, ASTGeneratorError::InvalidClassDefinition);
+                                derivedFrom = static_cast<void*>(&m_Input->at((size_t)derivedFromAt).GetValue());
+                                m_At++;
+                                next = GetToken(m_At);
+                            }else{
+                                return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                            }
+                        }
+                        if(next.GetValue() != '{')
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                        m_At++;
+                        
+                        //Get Class body
+                        std::vector<Node*> body;
+                        ASTGeneratorResult result;
+                        while(true){
+                            result = ParseCurrentToken(body);
+                            if(!result)break;
+                        }
+
+                        Token t = GetToken(m_At);
+                        if(t.GetValue() != '}'){
+                            if(!result)return result;
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
+                        }
+                        m_At++;
+                        void* left = &m_Input->at(identifierAt).GetValue();
+                        void* right = nullptr;
+                        uint8_t metadata = 0;
+
+                        output->m_Children.emplace_back(m_NodePool.Allocate(std::move(body), left, right, NodeType::ClassDeclaration, metadata));
+                        return ASTGeneratorResult();
+                        break;
+                    }
+                    case (uint8_t)Keyword::Function:{
+                        
+                    }
+                    default:{
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
+                    }
+                }
+            }
         case TokenType::ArithmeticOperator:{
-            if(t.GetMetadata() == (uint8_t)ArithmeticOperations::Subtraction){
+            if(currentToken.GetMetadata() == (uint8_t)ArithmeticOperations::Subtraction){
                 //- operator
                 uint32_t startAt = ++m_At;
                 Node* exp = m_NodePool.Allocate();
@@ -116,7 +173,8 @@ namespace FJASTP{
                     *replaceNode = Node(static_cast<void*>(newLeft), static_cast<void*>(arguments), NodeType::MethodCall, metadata);
                     m_At++;
                 }
-                else if(nextToken.GetType() == TokenType::ArithmeticOperator){
+                else if(nextToken.GetType() == TokenType::AssignmentOperator){
+                    std::cout << "ASSIGNMENT"<<std::endl;
                     ParseAssignmentExpression(output, nextToken);
                 }
             }
@@ -181,9 +239,9 @@ namespace FJASTP{
             return ASTGeneratorResult();
         }
         case TokenType::GroupingSymbol:{
-            HBuffer& value = t.GetValue();
+            HBuffer& value = currentToken.GetValue();
 
-            if(t.GetValue() == '('){
+            if(currentToken.GetValue() == '('){
                 //Parenthesis Expression Or Argument lists
                 m_At++;
                 if(GetToken(m_At).GetValue() == ')'){
@@ -352,6 +410,59 @@ namespace FJASTP{
         switch(currentToken.GetType()){
             case TokenType::EndOfFile:
                 return ASTGeneratorResult(ASTGeneratorError::EndOfFile);
+            case TokenType::Keyword:{
+                switch(currentToken.GetMetadata()){
+                    case (uint8_t)Keyword::Var:{
+                        Token nextToken = GetToken(m_At + 1);
+                        TokenType nextTokenType = nextToken.GetType();
+                        
+                        if(nextTokenType == TokenType::Identifier){
+                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
+                            Node* expression = m_NodePool.Allocate();
+                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Var, expression);
+                            if(!result)return result;
+                            outputNodes.emplace_back(expression);
+                            return ASTGeneratorResult();
+                        }
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
+                    }
+                    case (uint8_t)Keyword::Let:{
+                        Token nextToken = GetToken(m_At + 1);
+                        TokenType nextTokenType = nextToken.GetType();
+                        
+                        if(nextTokenType == TokenType::Identifier){
+                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
+                            Node* expression = m_NodePool.Allocate();
+                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Let, expression);
+                            if(!result)return result;
+                            outputNodes.emplace_back(expression);
+                            return ASTGeneratorResult();
+                        }
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
+                    }
+                    case (uint8_t)Keyword::Const:{
+                        Token nextToken = GetToken(m_At + 1);
+                        TokenType nextTokenType = nextToken.GetType();
+
+                        if(nextTokenType == TokenType::Identifier){
+                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
+                            Node* expression = m_NodePool.Allocate();
+                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Const, expression);
+                            if(!result)return result;
+                            outputNodes.emplace_back(expression);
+                            return ASTGeneratorResult();
+                        }
+                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
+                    }
+                    default:{
+                        Node* expression = m_NodePool.Allocate();
+                        ASTGeneratorResult result = ParseExpression(expression, expression);
+                        if(!result)return result;
+                        outputNodes.emplace_back(expression);
+                        return ASTGeneratorResult();
+                    }
+                }
+            }
             case TokenType::Identifier:{
                 size_t startAt = m_At;
                 Token nextToken = GetToken(m_At + 1);
@@ -424,102 +535,7 @@ namespace FJASTP{
 
                 return result;
             }
-            case TokenType::Keyword:{
-                uint8_t keyword = currentToken.GetMetadata();
-                switch(keyword){
-                    case (uint8_t)Keyword::Class:{
-                        uint32_t identifierAt = ++m_At;
-                        Token identifier = GetToken(identifierAt);
-                        void* derivedFrom = nullptr;
-                        if(identifier.GetType() != TokenType::Identifier)return ASTGeneratorResult(identifierAt, ASTGeneratorError::InvalidClassDefinition);
-
-                        Token next = GetToken(++m_At);
-                        TokenType type = next.GetType();
-                        if(type == TokenType::Keyword){
-                            if(next.GetMetadata() == (uint8_t)Keyword::Extends){
-                                /// Derived Class
-                                uint32_t derivedFromAt = ++m_At;
-                                if(GetToken(derivedFromAt).GetType() != TokenType::Identifier)return ASTGeneratorResult(derivedFromAt, ASTGeneratorError::InvalidClassDefinition);
-                                derivedFrom = static_cast<void*>(&m_Input->at((size_t)derivedFromAt).GetValue());
-                                m_At++;
-                                next = GetToken(m_At);
-                            }else{
-                                return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
-                            }
-                        }
-                        if(next.GetValue() != '{')
-                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
-                        m_At++;
-                        
-                        //Get Class body
-                        std::vector<Node*> body;
-                        ASTGeneratorResult result;
-                        while(true){
-                            result = ParseCurrentToken(body);
-                            if(!result)break;
-                        }
-
-                        Token t = GetToken(m_At);
-                        if(t.GetValue() != '}'){
-                            if(!result)return result;
-                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidClassDefinition);
-                        }
-                        m_At++;
-                        void* left = &m_Input->at(identifierAt).GetValue();
-                        void* right = nullptr;
-                        uint8_t metadata = 0;
-
-                        outputNodes.emplace_back(m_NodePool.Allocate(std::move(body), left, right, NodeType::ClassDeclaration, metadata));
-                        return ASTGeneratorResult();
-                        break;
-                    }
-                    case (uint8_t)Keyword::Var:{
-                        Token nextToken = GetToken(m_At + 1);
-                        TokenType nextTokenType = nextToken.GetType();
-                        
-                        if(nextTokenType == TokenType::Identifier){
-                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
-                            Node* expression = m_NodePool.Allocate();
-                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Var, expression);
-                            if(!result)return result;
-                            outputNodes.emplace_back(expression);
-                            return ASTGeneratorResult();
-                        }
-                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
-                    }
-                    case (uint8_t)Keyword::Let:{
-                        Token nextToken = GetToken(m_At + 1);
-                        TokenType nextTokenType = nextToken.GetType();
-                        
-                        if(nextTokenType == TokenType::Identifier){
-                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
-                            Node* expression = m_NodePool.Allocate();
-                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Let, expression);
-                            if(!result)return result;
-                            outputNodes.emplace_back(expression);
-                            return ASTGeneratorResult();
-                        }
-                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
-                    }
-                    case (uint8_t)Keyword::Const:{
-                        Token nextToken = GetToken(m_At + 1);
-                        TokenType nextTokenType = nextToken.GetType();
-
-                        if(nextTokenType == TokenType::Identifier){
-                            /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
-                            Node* expression = m_NodePool.Allocate();
-                            ASTGeneratorResult result = ParseVariableDeclaration(VariableDeclarationType::Const, expression);
-                            if(!result)return result;
-                            outputNodes.emplace_back(expression);
-                            return ASTGeneratorResult();
-                        }
-                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
-                    }
-                    default:{
-                        return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
-                    }
-                }
-            }
+            
         default:{
             Node* node = m_NodePool.Allocate();
             ASTGeneratorResult result = ParseExpression(node, node);
