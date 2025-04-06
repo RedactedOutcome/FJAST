@@ -94,11 +94,13 @@ namespace FJASTP{
         Const=2
     };
 
-    enum class NumericalLiteralBaseMetadataFormat : uint8_t{
+    enum class NumericalLiteralType : uint8_t{
         Base10=0,
         Binary=1,
         Hexidecimal=2,
-        ScientificNotation=3
+        ScientificNotation=3,
+        Infinity,
+        NaN
     };
 
     enum class Keyword : uint8_t{
@@ -146,7 +148,8 @@ namespace FJASTP{
         Division,
         Exponentiation,
         Increment,
-        Decrement
+        Decrement,
+        Modulus
     };
 
     enum class AssignmentOperator : uint8_t{

@@ -50,6 +50,12 @@ namespace FJASTP{
         ASTGeneratorResult ParseVariableDeclaration(VariableDeclarationType type, Node* currentOutput) noexcept;
         ASTGeneratorResult ParseType(Node* output)noexcept;
 
+        /// @brief Parses an assignment expression where m_At is at the current operator position
+        /// @param output the input and output. Current output is treated as left of the new expression
+        /// @param assignmentOperator the current assignment operator token
+        /// @return 
+        ASTGeneratorResult ParseAssignmentExpression(Node* output, Token assignmentOperator) noexcept;
+
         ASTGeneratorResult ParseCurrentToken(std::vector<Node*>& output)noexcept;
     private:
         std::vector<Token>* m_Input;

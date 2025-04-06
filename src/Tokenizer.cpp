@@ -123,7 +123,11 @@ namespace FJASTP{
                         }
                         break;
                     }
-                    //TODO: /=
+                    else if(nextChar == '='){
+                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), (uint8_t)AssignmentOperator::DivisionAssignment, m_Line, GetCurrentColumn());
+                        m_At+=2;
+                        break;
+                    }
 
                     //Operators that start with /
                     PushBack(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At, 1), (uint8_t)ArithmeticOperations::Division, m_Line, GetCurrentColumn());
@@ -178,8 +182,13 @@ namespace FJASTP{
                     break;
                 }
                 case '%':{
-                    //Some form of modulos operator
-
+                    char nextToken = m_CurrentInput.Get(m_At + 1);
+                    if(nextToken == '='){
+                        PushBack(TokenType::AssignmentOperator, m_CurrentInput.SubBuffer(m_At, 2), (uint8_t)AssignmentOperator::ModulosAssignment, m_Line, GetCurrentColumn());
+                        m_At+=2;
+                        break;
+                    }
+                    PushBack(TokenType::ArithmeticOperator, m_CurrentInput.SubBuffer(m_At++, 1), (uint8_t)ArithmeticOperations::Modulus, m_Line, GetCurrentColumn());
                     break;
                 }
                 case '\'':
@@ -288,7 +297,7 @@ namespace FJASTP{
                     m_At++;
 
                     bool hasDecimal = false;
-                    NumericalLiteralBaseMetadataFormat format = NumericalLiteralBaseMetadataFormat::Base10;
+                    NumericalLiteralType format = NumericalLiteralType::Base10;
                     bool notationExponentNeg = false;
                     bool startedExponent=false;
 
@@ -298,8 +307,8 @@ namespace FJASTP{
                         
                         bool shouldContinue = false;
                         switch(format){
-                        case NumericalLiteralBaseMetadataFormat::ScientificNotation:
-                        case NumericalLiteralBaseMetadataFormat::Base10:{
+                        case NumericalLiteralType::ScientificNotation:
+                        case NumericalLiteralType::Base10:{
                             if(c >= '0' && c <= '9'){
                                 m_At++;
                                 shouldContinue = true;
@@ -308,7 +317,7 @@ namespace FJASTP{
                             }
                             break;
                         }
-                        case NumericalLiteralBaseMetadataFormat::Hexidecimal:{
+                        case NumericalLiteralType::Hexidecimal:{
                             if((c >= '0' && c <= '9') || (c >= 'A' && c <= 'F') || (c >= 'a' && c <= 'f')){
                                 m_At++;
                                 shouldContinue = true;
@@ -316,7 +325,7 @@ namespace FJASTP{
                             }
                             break;
                         }
-                        case NumericalLiteralBaseMetadataFormat::Binary:{
+                        case NumericalLiteralType::Binary:{
                             if((c >= '0' && c <= '1')){
                                 m_At++;
                                 shouldContinue = true;
@@ -328,38 +337,38 @@ namespace FJASTP{
                         if(shouldContinue)continue;
 
                         if(c == '.'){
-                            if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            if(hasDecimal || format != NumericalLiteralType::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                             hasDecimal = true;
                             m_At++;
                             continue;
                         }
                         if(c == 'x' || c == 'X'){
-                            if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            if(hasDecimal || format != NumericalLiteralType::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                             if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                             if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                            format = NumericalLiteralBaseMetadataFormat::Hexidecimal;
+                            format = NumericalLiteralType::Hexidecimal;
                             m_At++;
                             continue;
                         }
                         if(c == 'b' || c == 'B'){
-                            if(hasDecimal || format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            if(hasDecimal || format != NumericalLiteralType::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                             if(m_At - startAt > 2)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                             if(m_CurrentInput.At(startAt + 1) != '0')return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                            format = NumericalLiteralBaseMetadataFormat::Binary;
+                            format = NumericalLiteralType::Binary;
                             m_At++;
                             continue;
                         }
 
                         if(c == 'E' || c == 'e'){
-                            if(format != NumericalLiteralBaseMetadataFormat::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
-                            format = NumericalLiteralBaseMetadataFormat::ScientificNotation;
+                            if(format != NumericalLiteralType::Base10)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
+                            format = NumericalLiteralType::ScientificNotation;
                             m_At++;
                             startedExponent = false;
                             continue;
                         }
 
                         if(c == '-'){
-                            if(!startedExponent && format == NumericalLiteralBaseMetadataFormat::ScientificNotation){
+                            if(!startedExponent && format == NumericalLiteralType::ScientificNotation){
                                 if(notationExponentNeg)return TokenizeResult(m_Line, GetCurrentColumn(), TokenizerError::InvalidNumericalLiteral);
                                 notationExponentNeg = true;
                                 m_At++;
@@ -529,9 +538,20 @@ namespace FJASTP{
 
         uint32_t identifierSize = (m_At - startAt);
         HBuffer buff = m_CurrentInput.SubPointer(startAt, identifierSize);
-        uint8_t keyword = FJastP::GetKeywordValue(buff);
-        TokenType tokenType = keyword > 0 ? TokenType::Keyword : TokenType::Identifier;
-        PushBack(tokenType, std::move(buff), keyword, m_Line, GetCurrentColumn(startAt));
+        uint8_t metadata = FJastP::GetKeywordValue(buff);
+        TokenType tokenType = TokenType::Identifier;
+        if(metadata > 0)tokenType = TokenType::Keyword;
+        else{
+            if(buff == "Infinity"){
+                metadata = static_cast<uint8_t>(NumericalLiteralType::Infinity);
+                tokenType = TokenType::NumericalLiteral;
+            }
+            else if(buff == "NaN"){
+                metadata = static_cast<uint8_t>(NumericalLiteralType::NaN);
+                tokenType = TokenType::NumericalLiteral;
+            }
+        }
+        PushBack(tokenType, std::move(buff), metadata, m_Line, GetCurrentColumn(startAt));
         //Success no need to return anything
         return TokenizeResult();
     }

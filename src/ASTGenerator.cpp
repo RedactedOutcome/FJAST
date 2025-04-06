@@ -38,6 +38,19 @@ namespace FJASTP{
 
         return ASTGeneratorResult();
     }
+    
+    ASTGeneratorResult ASTGenerator::ParseAssignmentExpression(Node* output, Token assignmentOperator) noexcept{
+        m_At++;
+        Node* right = m_NodePool.Allocate();
+        ASTGeneratorResult result = ParseExpression(right, right);
+        if(!result)return result;
+
+        NodeType nodeType = right->GetNodeType();
+        *output = Node(static_cast<void*>(m_NodePool.Allocate(std::move(*output))), static_cast<void*>(right), NodeType::AssignmentExpression, assignmentOperator.GetMetadata());
+        if(GetToken(m_At).GetValue() == ';')
+            m_At++;
+        return ASTGeneratorResult();
+    }
     ASTGeneratorResult ASTGenerator::ParseExpression(Node* output, Node* replaceNode, bool allowArithmeticOperations)noexcept{
         Token t = GetToken(m_At);
         TokenType currentTokenType = t.GetType();
@@ -83,7 +96,6 @@ namespace FJASTP{
                     m_At++;
                     nextToken = GetToken(m_At);
                 }while(nextToken.GetValue() == '.');
-
                 /// Confirm that new type is a valid property access
                 NodeType type = output->GetNodeType();
                 if(type != NodeType::PropertyAccessExpression)return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidPropertyAccessExpression);\
@@ -104,6 +116,9 @@ namespace FJASTP{
                     *replaceNode = Node(static_cast<void*>(newLeft), static_cast<void*>(arguments), NodeType::MethodCall, metadata);
                     m_At++;
                 }
+                else if(nextToken.GetType() == TokenType::ArithmeticOperator){
+                    ParseAssignmentExpression(output, nextToken);
+                }
             }
             else if(nextValue == '('){
                 m_At++;
@@ -118,14 +133,13 @@ namespace FJASTP{
                 //return ASTGeneratorResult();
             }
             else if(nextTokenType == TokenType::AssignmentOperator){
-                //Handles x (assignment operator) value
-                Node* left = m_NodePool.Allocate(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
-                m_At+=2;
-                Node* value = m_NodePool.Allocate();
-                ASTGeneratorResult result = ParseExpression(value, value);
-                if(!result)return result;
-                *output = Node(static_cast<void*>(left), static_cast<void*>(value), NodeType::AssignmentExpression, nextToken.GetMetadata());
-                if(GetToken(m_At).GetValue() == ';')m_At++;
+                std::cout << "BEFORE " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
+                *output = Node(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
+                Token assignmentOperator = GetToken(++m_At);
+                std::cout << "ASSIGNMENT OPERATOR " << assignmentOperator.GetValue().SubString(0,-1).GetCStr()<<std::endl;
+                ASTGeneratorResult result = ParseAssignmentExpression(output, assignmentOperator);
+                std::cout << "AFTER " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
+                return result;
             }
             else if(nextValue == "++"){
                 //Unary Increment operator
@@ -490,7 +504,7 @@ namespace FJASTP{
                     case (uint8_t)Keyword::Const:{
                         Token nextToken = GetToken(m_At + 1);
                         TokenType nextTokenType = nextToken.GetType();
-                        
+
                         if(nextTokenType == TokenType::Identifier){
                             /// @brief Parse variable declaration may return a variable declaration or an assignment with a varaible declaration
                             Node* expression = m_NodePool.Allocate();

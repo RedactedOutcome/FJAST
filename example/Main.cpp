@@ -33,7 +33,7 @@ int main(int argc, char** argv){
     }else{
         test1 = argv[1];
     }
-
+    
     std::cout << "Starting"<<std::endl;
     InitializationResult initResult = FJastP::Init();
     if(initResult != InitializationResult::Success){
@@ -44,7 +44,8 @@ int main(int argc, char** argv){
     auto t1 = std::chrono::high_resolution_clock::now();
     Tokenizer t;
     std::vector<Token> tokens;
-    TokenizeResult result = t.Tokenize(test1, tokens);
+    tokens.reserve(500);
+    TokenizeResult result = t.Tokenize(test1, tokens, true);
 
     if(!result){
         std::cout << "Error Tokenizing Javascript. Error " << (int)result.m_ErrorCode << " at " << result.m_Line << ":" << result.m_Column <<std::endl;
@@ -56,27 +57,34 @@ int main(int argc, char** argv){
     std::cout << "Tokenizing time: " << duration.count() << " seconds\n";
     std::cout << "There are " << tokens.size() << " Tokens"<<std::endl;
 
+    //Without comments
+    std::vector<Token> newTokens;
     for(size_t i = 0; i < tokens.size(); i++){
-        Token& token = tokens[i];
-        //TODO: add pad start functions to HBuffwer
-        //std::cout << "Token " << i << " " << token.GetLineNumber() << ":" << token.GetColumnNumber()<< " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;
+        if(tokens[i].GetType() != TokenType::Comment)
+            newTokens.emplace_back(std::move(tokens[i]));
+    }
+    std::cout <<"Parsing phase"<<std::endl;
+
+    for(size_t i = 0; i < newTokens.size(); i++){
+        Token& token = newTokens[i];
+        //TODO: add pad start functions to HBuffer
+        std::cout << "Token " << i << " " << token.GetLineNumber() << ":" << token.GetColumnNumber()<< " Is (" << (int)token.GetType() << " " << token.GetValue().SubString(0, -1).GetCStr() << ")" << std::endl;
     }
 
     ASTGenerator astGenerator;
     std::vector<Node*> ast; 
     ast.reserve(1000);
-    
-    std::cout <<"Parsing phase"<<std::endl;
     auto t3 = std::chrono::high_resolution_clock::now();
 
-    ASTGeneratorResult parseResult = astGenerator.Generate(tokens, ast);
+    ASTGeneratorResult parseResult = astGenerator.Generate(newTokens, ast);
 
     if(!parseResult){
-        Token& errorToken = tokens[parseResult.GetErrorAt()];
+        Token& errorToken = newTokens[parseResult.GetErrorAt()];
         int errorCode = (uint8_t)parseResult.GetErrorCode();
-        printf("Failed to parse AST. Error %d, %s at %d:%d\n", errorCode, FJASTP::ASTGeneratorErrorStrings[errorCode], errorToken.GetLineNumber(), errorToken.GetColumnNumber());
+        printf("Failed to parse AST. Error %d, %s at %d:%d from token %s\n", errorCode, FJASTP::ASTGeneratorErrorStrings[errorCode], errorToken.GetLineNumber(), errorToken.GetColumnNumber(), errorToken.GetValue().SubString(0,-1).GetCStr());
         return -1;
     }
+
     auto t4 = std::chrono::high_resolution_clock::now();
     std::cout <<"Done Parsing"<<std::endl;
     

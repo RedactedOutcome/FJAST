@@ -20,7 +20,6 @@ namespace FJASTP{
     Token& Token::operator=(const Token& token)noexcept{
         m_Type = token.m_Type;
         m_Metadata = token.m_Metadata;
-        m_Type = token.m_Type;
         m_Value = token.m_Value;
         m_LineNumber = token.m_LineNumber;
         m_ColumnNumber = token.m_ColumnNumber;
@@ -29,7 +28,6 @@ namespace FJASTP{
     Token& Token::operator=(Token&& token)noexcept{
         m_Type = token.m_Type;
         m_Metadata = token.m_Metadata;
-        m_Type = token.m_Type;
         m_Value = std::move(token.m_Value);
         m_LineNumber = token.m_LineNumber;
         m_ColumnNumber = token.m_ColumnNumber;
