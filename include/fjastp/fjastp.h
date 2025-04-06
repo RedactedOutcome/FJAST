@@ -39,6 +39,7 @@ namespace FJASTP{
         EmptyExpression,
         IdentifierExpression,
         NumericalLiteralExpression,
+        StringLiteralExpression,
         ArithmeticExpression,
         UnaryExpression,
         Literal,
@@ -84,7 +85,8 @@ namespace FJASTP{
         UnsupportedSyntax               =13,
         InvalidParameterList            =14,
         InvalidPropertyAccessExpression =15,
-        InvalidVariableAssignment = 16
+        InvalidVariableAssignment = 16,
+        InvalidFunctionEncapsulation
     };
     extern const char* ASTGeneratorErrorStrings[17];
 

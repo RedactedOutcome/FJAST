@@ -107,7 +107,43 @@ namespace FJASTP{
                         break;
                     }
                     case (uint8_t)Keyword::Function:{
+                        m_At++;
+                        if(m_At >= m_Input->size())return ASTGeneratorResult(m_At, ASTGeneratorError::EndOfFile);
+                        Token& identifier = m_Input->at(m_At);
                         
+                        if(identifier.GetType() != TokenType::Identifier){
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidFunctionDeclaration);
+                        }
+                        if(GetToken(++m_At).GetValue() != '('){
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidParameterList);
+                        }
+                        uint32_t parametersAt = m_At;
+                        Node* parameterList = m_NodePool.Allocate();
+                        ASTGeneratorResult result = ParseExpression(parameterList, parameterList);
+                        if(!result)return result;
+
+                        NodeType parameterListType = parameterList->GetNodeType();
+                        if(parameterListType != NodeType::EmptyExpression && parameterListType != NodeType::IdentifierExpression && parameterListType != NodeType::ParameterList)
+                            return ASTGeneratorResult(parametersAt, ASTGeneratorError::InvalidParameterList);
+                        if(GetToken(m_At).GetValue() != '{'){
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidFunctionBody);
+                        }
+                        m_At++;
+
+                        std::vector<Node*> body;
+                        do{
+                            result = ParseCurrentToken(body);
+                        }while(result);
+
+                        if(GetToken(m_At).GetValue() != '}'){
+                            if(result != ASTGeneratorError::UnsupportedSyntax)
+                                return result;
+                            return ASTGeneratorResult(m_At, ASTGeneratorError::InvalidFunctionEncapsulation);
+                        }
+                        m_At++;
+
+                        Node* identifierExpression = m_NodePool.Allocate(static_cast<void*>(&identifier.GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
+                        *output = Node(static_cast<void*>(identifierExpression), static_cast<void*>(parameterList), NodeType::FunctionDeclaration, 0);
                     }
                     default:{
                         return ASTGeneratorResult(m_At, ASTGeneratorError::UnsupportedSyntax);
@@ -174,7 +210,6 @@ namespace FJASTP{
                     m_At++;
                 }
                 else if(nextToken.GetType() == TokenType::AssignmentOperator){
-                    std::cout << "ASSIGNMENT"<<std::endl;
                     ParseAssignmentExpression(output, nextToken);
                 }
             }
@@ -191,12 +226,9 @@ namespace FJASTP{
                 //return ASTGeneratorResult();
             }
             else if(nextTokenType == TokenType::AssignmentOperator){
-                std::cout << "BEFORE " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
                 *output = Node(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::IdentifierExpression, 0);
                 Token assignmentOperator = GetToken(++m_At);
-                std::cout << "ASSIGNMENT OPERATOR " << assignmentOperator.GetValue().SubString(0,-1).GetCStr()<<std::endl;
                 ASTGeneratorResult result = ParseAssignmentExpression(output, assignmentOperator);
-                std::cout << "AFTER " << GetToken(m_At).GetValue().SubString(0,-1).GetCStr()<<std::endl;
                 return result;
             }
             else if(nextValue == "++"){
@@ -349,6 +381,11 @@ namespace FJASTP{
 
             return ASTGeneratorResult(m_At, ASTGeneratorError::ExpectedExpressionOrStatement);
         }
+        case TokenType::StringLiteral:{
+            *output = Node(static_cast<void*>(&m_Input->at(m_At).GetValue()), static_cast<void*>(nullptr), NodeType::StringLiteralExpression, 0);
+            m_At++;
+            return ASTGeneratorResult();
+        }
         case TokenType::NumericalLiteral:{
             size_t numericalLiteralAt = m_At;
 
@@ -484,12 +521,12 @@ namespace FJASTP{
                         //Parse function body
                         std::vector<Node*> body;
                         ASTGeneratorResult result;
-                        while(true){
+                        while(result){
                             result = ParseCurrentToken(body);
-                            if(!result)break;
                         }
 
                         if(GetToken(m_At).GetValue() != '}'){
+                            /// TODO: this wont get called right?
                             if(!result){
                                 return result;
                             }

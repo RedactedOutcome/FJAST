@@ -18,7 +18,12 @@ class HelloTest1{
         const constVariaable = 15;
         x *= 25;
 
-        console.log = function hello(){}
+        console.log = function hello(variableName){
+            print("HEllo World");
+            var test1 = var1 * 15;
+
+            functionCall(teste1);
+        }
         /*
         for(var i = 0; i < 15; i++){
             console.log("Hello World")

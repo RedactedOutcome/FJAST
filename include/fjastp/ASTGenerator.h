@@ -17,9 +17,13 @@ namespace FJASTP{
 
         uint32_t GetErrorAt() const noexcept{return m_ErrorAt;}
         ASTGeneratorError GetErrorCode() const noexcept{return m_ErrorCode;}
-        
+
         constexpr operator bool() const noexcept{
             return m_ErrorCode == ASTGeneratorError::Success;
+        }
+
+        constexpr bool operator!=(ASTGeneratorError error) const noexcept{
+            return m_ErrorCode != error;
         }
     };
     
